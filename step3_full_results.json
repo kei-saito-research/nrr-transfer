@@ -1,0 +1,169 @@
+{
+  "metadata": {
+    "date": "2026-01-31T12:03:33.074128",
+    "model": "claude-sonnet-4-20250514",
+    "experiment": "Step 3 Full Experiment"
+  },
+  "summary": {
+    "total_scenarios": 3,
+    "total_turns": 16,
+    "total_tokens": 1833,
+    "avg_per_turn_overall": 114.5625,
+    "overall_extraction_rate": 1.0,
+    "rag_avg": 116.3,
+    "agent_avg": 111.66666666666667
+  },
+  "scenarios": {
+    "rag_customer_support": {
+      "scenario_key": "rag_customer_support",
+      "scenario_name": "Customer Support Documentation",
+      "type": "RAG",
+      "turns": [
+        {
+          "turn": 1,
+          "input_tokens": 101,
+          "output_tokens": 12,
+          "total_tokens": 113,
+          "success": true
+        },
+        {
+          "turn": 2,
+          "input_tokens": 105,
+          "output_tokens": 12,
+          "total_tokens": 117,
+          "success": true
+        },
+        {
+          "turn": 3,
+          "input_tokens": 101,
+          "output_tokens": 12,
+          "total_tokens": 113,
+          "success": true
+        },
+        {
+          "turn": 4,
+          "input_tokens": 105,
+          "output_tokens": 12,
+          "total_tokens": 117,
+          "success": true
+        },
+        {
+          "turn": 5,
+          "input_tokens": 102,
+          "output_tokens": 12,
+          "total_tokens": 114,
+          "success": true
+        }
+      ],
+      "total_tokens": 574,
+      "total_input_tokens": 514,
+      "total_output_tokens": 60,
+      "operator_extraction_success": 5,
+      "avg_tokens_per_turn": 114.8,
+      "operator_extraction_rate": 1.0
+    },
+    "rag_troubleshooting": {
+      "scenario_key": "rag_troubleshooting",
+      "scenario_name": "Product Troubleshooting",
+      "type": "RAG",
+      "turns": [
+        {
+          "turn": 1,
+          "input_tokens": 109,
+          "output_tokens": 12,
+          "total_tokens": 121,
+          "success": true
+        },
+        {
+          "turn": 2,
+          "input_tokens": 105,
+          "output_tokens": 12,
+          "total_tokens": 117,
+          "success": true
+        },
+        {
+          "turn": 3,
+          "input_tokens": 105,
+          "output_tokens": 12,
+          "total_tokens": 117,
+          "success": true
+        },
+        {
+          "turn": 4,
+          "input_tokens": 105,
+          "output_tokens": 12,
+          "total_tokens": 117,
+          "success": true
+        },
+        {
+          "turn": 5,
+          "input_tokens": 105,
+          "output_tokens": 12,
+          "total_tokens": 117,
+          "success": true
+        }
+      ],
+      "total_tokens": 589,
+      "total_input_tokens": 529,
+      "total_output_tokens": 60,
+      "operator_extraction_success": 5,
+      "avg_tokens_per_turn": 117.8,
+      "operator_extraction_rate": 1.0
+    },
+    "agent_task_priority": {
+      "scenario_key": "agent_task_priority",
+      "scenario_name": "Task Prioritization Agent",
+      "type": "Agent",
+      "turns": [
+        {
+          "turn": 1,
+          "input_tokens": 99,
+          "output_tokens": 12,
+          "total_tokens": 111,
+          "success": true
+        },
+        {
+          "turn": 2,
+          "input_tokens": 98,
+          "output_tokens": 12,
+          "total_tokens": 110,
+          "success": true
+        },
+        {
+          "turn": 3,
+          "input_tokens": 105,
+          "output_tokens": 12,
+          "total_tokens": 117,
+          "success": true
+        },
+        {
+          "turn": 4,
+          "input_tokens": 101,
+          "output_tokens": 12,
+          "total_tokens": 113,
+          "success": true
+        },
+        {
+          "turn": 5,
+          "input_tokens": 97,
+          "output_tokens": 12,
+          "total_tokens": 109,
+          "success": true
+        },
+        {
+          "turn": 6,
+          "input_tokens": 98,
+          "output_tokens": 12,
+          "total_tokens": 110,
+          "success": true
+        }
+      ],
+      "total_tokens": 670,
+      "total_input_tokens": 598,
+      "total_output_tokens": 72,
+      "operator_extraction_success": 6,
+      "avg_tokens_per_turn": 111.66666666666667,
+      "operator_extraction_rate": 1.0
+    }
+  }
+}
