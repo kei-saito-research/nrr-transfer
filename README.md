@@ -1,8 +1,8 @@
-# NRR-Phase1.5: Universal Generality Across Six Domains
+# NRR-Universal: Universal Generality Across Six Domains
 
 Reference implementation for the paper:
 
-**"Non-Resolution Reasoning Phase 1.5: Universal Generality Across Six Domains"**  
+**"NRR-Universal: Universal Generality Across Six Domains"**  
 Kei Saito (2026)  
 *Manuscript in preparation* (arXiv submission pending)
 
@@ -24,7 +24,7 @@ This repository contains the experimental validation code for NRR Phase 1.5 univ
 ## Repository Structure
 
 ```
-nrr-phase1.5/
+nrr-universal/
 ├── README.md                        # This file
 ├── requirements.txt                 # Python dependencies
 ├── experiments/
@@ -126,7 +126,7 @@ If you use this code, please cite:
 
 ```bibtex
 @article{saito2026universal,
-  title={Non-Resolution Reasoning Phase 1.5: Universal Generality Across Six Domains},
+  title={NRR-Universal: Universal Generality Across Six Domains},
   author={Saito, Kei},
   journal={arXiv preprint},
   year={2026},
