@@ -138,11 +138,9 @@ If you use this code, please cite:
 
 ## Related Repositories
 
-- [NRR-Core](https://github.com/kei-saito-research/nrr-framework) - Foundational framework (Paper 1)
-- [NRR-Phi](https://github.com/kei-saito-research/nrr-phi-mapping) - Text-to-state mapping (Paper 2)
-- [NRR-Operators](https://github.com/kei-saito-research/nrr-operators) - Operator design principles (Paper 3)
-- [NRR-IME](https://github.com/kei-saito-research/nrr-ime) - Structure-aware optimization (Paper 4)
-- [NRR-Hout](https://github.com/kei-saito-research/nrr-hout) - Output-side entropy measurement (Paper H)
+- [NRR-Core](https://github.com/kei-saito-research/nrr-framework) - Foundational framework
+- [NRR-Phi](https://github.com/kei-saito-research/nrr-phi-mapping) - Text-to-state mapping
+- [NRR-IME](https://github.com/kei-saito-research/nrr-ime) - Structure-aware optimization
 
 ---
 
