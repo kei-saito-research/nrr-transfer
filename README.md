@@ -138,16 +138,23 @@ If you use this code, please cite:
 
 ## Related Repositories
 
-- [NRR-Core](https://github.com/kei-saito-research/nrr-framework) - Foundational framework
-- [NRR-Phi](https://github.com/kei-saito-research/nrr-phi-mapping) - Text-to-state mapping
+- [NRR-Core](https://github.com/kei-saito-research/nrr-core)
+- [NRR-Phi](https://github.com/kei-saito-research/nrr-phi) - Text-to-state mapping
 - [NRR-IME](https://github.com/kei-saito-research/nrr-ime) - Structure-aware optimization
 
 ---
 
+## Commercial Use
+
+This work is released openly under a CC BY 4.0 license.
+
+If you plan to use it in a commercial or production setting,
+a short message would be appreciated.
+It helps me understand real-world use and continue the research.
+
 ## License
 
-This code is licensed under CC BY 4.0.  
-© 2026 Kei Saito
+CC BY 4.0 License. See [LICENSE](LICENSE).
 
 ---
 
