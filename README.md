@@ -7,6 +7,7 @@ Kei Saito (2026)
 *Manuscript in preparation* (arXiv submission pending)
 
 Part of the Non-Resolution Reasoning (NRR) research program.
+Program Map (series hub): [NRR Program Map](https://github.com/kei-saito-research/nrr-core/blob/main/PROGRAM_MAP.md)
 
 ---
 
