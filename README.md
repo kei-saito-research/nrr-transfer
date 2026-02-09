@@ -132,7 +132,7 @@ If you use this code, please cite:
 
 ## Related Repositories
 
-- [NRR-Core](https://github.com/kei-saito-research/nrr-core)
+- [NRR-Core](https://github.com/kei-saito-research/nrr-core) - Foundational framework
 - [NRR-Phi](https://github.com/kei-saito-research/nrr-phi) - Text-to-state mapping
 - [NRR-IME](https://github.com/kei-saito-research/nrr-ime) - Structure-aware optimization
 
