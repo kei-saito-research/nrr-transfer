@@ -14,10 +14,10 @@ Part of the Non-Resolution Reasoning (NRR) research program.
 
 This repository contains the experimental validation code for NRR Phase 1.5 universality, demonstrating:
 
-- **100% extraction success** across 18 scenarios spanning 6 domains
-- **Operator selection variation**: 0%-100% demonstrating true generality
-- **Consistent token efficiency**: 67.6-85.3 tokens/turn across all domains
-- **No domain-specific tuning** required
+- **Cross-domain protocol**: 324 runs and 1,512 turns (18 scenarios x 3 models x 2 temperatures x 3 trials)
+- **100% extraction success** across all runs (1,512/1,512 turns)
+- **Temperature-robust efficiency**: mean difference 0.0072 tokens/turn (T=0.3 vs T=0.0), max absolute difference 0.4444
+- **Operator-pattern generality**: 0%-100% delta usage by scenario while preserving 100% extraction success
 
 ---
 
@@ -53,15 +53,6 @@ pip install -r requirements.txt
 python experiments/cross_domain_validation.py
 ```
 
-Output:
-```
-Total scenarios: 18
-Total turns: 84
-Extraction success: 84/84 (100%)
-Operator distribution: 69σ (82.1%), 15δ (17.9%)
-Overall efficiency: 75.8 tokens/turn
-```
-
 **Operator Analysis:**
 ```bash
 python experiments/operator_analysis.py
@@ -84,39 +75,42 @@ Figures will be saved in the `figures/` directory.
 
 All experimental results are stored in `experiments/experimental_data.json`:
 
-- 18 scenarios across 6 domains
-- Turn-by-turn operator extraction
-- Token consumption statistics
-- Operator selection patterns
+- Full protocol logs for 324 runs (18 scenarios x 3 models x 2 temperatures x 3 trials)
+- Turn-by-turn operator extraction (1,512 turns total)
+- Token consumption statistics and temperature robustness metrics
+- Operator selection patterns by domain and scenario
 
 ---
 
-## Key Results
+## Key Results (Paper-Aligned)
 
-### Domain Coverage
+- **Total runs**: 324
+- **Total turns**: 1,512
+- **Extraction success**: 100% (1,512/1,512)
+- **Overall efficiency**:
+  - T=0.0: 65.720 tokens/turn (scenario-model mean)
+  - T=0.3: 65.728 tokens/turn (scenario-model mean)
+  - Mean delta (0.3 - 0.0): 0.0072 tokens/turn
+  - Max absolute temperature difference: 0.4444
 
-| Domain | Scenarios | Turns | Tokens | Avg/Turn |
-|--------|-----------|-------|--------|----------|
-| IME | 3 | 27 | 2302 | 85.3 |
-| RAG | 2 | 10 | 779 | 77.9 |
-| Agent | 1 | 6 | 437 | 72.8 |
-| Planning | 4 | 13 | 916 | 70.5 |
-| Multi-agent | 4 | 14 | 947 | 67.6 |
-| Multimodal | 4 | 14 | 983 | 70.2 |
-| **Total** | **18** | **84** | **6364** | **75.8** |
+### Per-Domain Token Usage (T=0.3, averaged across models)
 
-### Operator Selection Patterns
+| Domain | Avg tokens/turn |
+|--------|------------------|
+| IME | 76.5 |
+| RAG | 69.6 |
+| Agent | 64.1 |
+| Planning | 63.6 |
+| Multi-agent | 61.0 |
+| Multimodal | 63.0 |
+| **Overall (18 scenarios)** | **65.7** |
 
-- **100% σ (strengthen)**: 9 scenarios (IME, RAG, Agent, some Planning)
-- **Mixed σ/δ**: 5 scenarios (some Planning, Multimodal)
-- **100% δ (dampen)**: 2 scenarios (Planning)
-- **Range**: 0%-100%, demonstrating true architectural generality
+### Operator Selection (all 324 runs)
 
-### Extraction Success
-
-- **84/84 turns (100%)**: Successful operator extraction
-- **No domain-specific tuning**: Pure Phase 1.5 architecture
-- **Consistent efficiency**: 67.6-85.3 tokens/turn despite operator variation
+- Objective-leaning domains (IME, RAG, Agent): 686 sigma (88.6%), 88 delta (11.4%)
+- Subjective-heavy domains (Planning, Multi-agent, Multimodal): 189 sigma (25.6%), 549 delta (74.4%)
+- Overall: 875 sigma (57.9%), 637 delta (42.1%)
+- Scenario-level usage spans 0%-100% delta while maintaining 100% extraction success
 
 ---
 
