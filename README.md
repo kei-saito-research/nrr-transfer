@@ -1,8 +1,8 @@
-# NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators
+# NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators Under Fixed Interface Constraints
 
 Reference implementation for the paper:
 
-**"NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators"**  
+**"NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators Under Fixed Interface Constraints"**  
 Kei Saito (2026)  
 *Manuscript in preparation* (arXiv submission pending)
 
@@ -121,7 +121,7 @@ If you use this code, please cite:
 
 ```bibtex
 @article{saito2026universal,
-  title={NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators},
+  title={NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators Under Fixed Interface Constraints},
   author={Saito, Kei},
   journal={arXiv preprint},
   year={2026},
