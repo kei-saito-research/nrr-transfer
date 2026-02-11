@@ -1,8 +1,8 @@
-# NRR-Universal: Universal Generality Across Six Domains
+# NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators
 
 Reference implementation for the paper:
 
-**"NRR-Universal: Universal Generality Across Six Domains"**  
+**"NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators"**  
 Kei Saito (2026)  
 *Manuscript in preparation* (arXiv submission pending)
 
@@ -13,7 +13,7 @@ Program Map (series hub): [NRR Program Map](https://github.com/kei-saito-researc
 
 ## Overview
 
-This repository contains the experimental validation code for NRR Phase 1.5 universality, demonstrating:
+This repository contains the experimental validation code for NRR Phase 1.5 transferability, demonstrating:
 
 - **Cross-domain protocol**: 324 runs and 1,512 turns (18 scenarios x 3 models x 2 temperatures x 3 trials)
 - **100% extraction success** across all runs (1,512/1,512 turns)
@@ -25,7 +25,7 @@ This repository contains the experimental validation code for NRR Phase 1.5 univ
 ## Repository Structure
 
 ```
-nrr-universal/
+nrr-transfer/
 ├── README.md                        # This file
 ├── requirements.txt                 # Python dependencies
 ├── experiments/
@@ -121,7 +121,7 @@ If you use this code, please cite:
 
 ```bibtex
 @article{saito2026universal,
-  title={NRR-Universal: Universal Generality Across Six Domains},
+  title={NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators},
   author={Saito, Kei},
   journal={arXiv preprint},
   year={2026},
@@ -139,6 +139,12 @@ If you use this code, please cite:
 
 ---
 
+## Reproducibility
+
+See [`reproducibility.md`](./reproducibility.md) for environment, fixed settings, runnable commands, and artifact mapping.
+
+---
+
 ## Commercial Use
 
 If you plan to use this in a commercial or production setting,
@@ -153,7 +159,7 @@ CC BY 4.0 License. See [LICENSE](LICENSE).
 ## Reproduction & Issue Reports
 
 If you reproduce results, find discrepancies, or hit bugs, please open an issue:
-- https://github.com/kei-saito-research/nrr-universal/issues
+- https://github.com/kei-saito-research/nrr-transfer/issues
 
 Please include:
 - environment (OS, Python version)
