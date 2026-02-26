@@ -1,0 +1,807 @@
+{
+  "bank": {
+    "name": "Bank (5 turns)",
+    "domain": "IME",
+    "ambiguous_term": "bank",
+    "initial_state": {
+      "financial": 0.5,
+      "river": 0.5
+    },
+    "turns": [
+      {
+        "text": "The bank is solid and reliable.",
+        "expected": [
+          "sigma",
+          "financial"
+        ]
+      },
+      {
+        "text": "Perfect for ducks and herons.",
+        "expected": [
+          "sigma",
+          "river"
+        ]
+      },
+      {
+        "text": "Their interest rates just dropped.",
+        "expected": [
+          "sigma",
+          "financial"
+        ]
+      },
+      {
+        "text": "The muddy bank eroded last spring.",
+        "expected": [
+          "sigma",
+          "river"
+        ]
+      },
+      {
+        "text": "I deposited my paycheck there.",
+        "expected": [
+          "sigma",
+          "financial"
+        ]
+      }
+    ]
+  },
+  "spring": {
+    "name": "Spring (10 turns)",
+    "domain": "IME",
+    "ambiguous_term": "spring",
+    "initial_state": {
+      "season": 0.4,
+      "water": 0.3,
+      "mechanical": 0.2,
+      "leap": 0.1
+    },
+    "turns": [
+      {
+        "text": "春になると花が咲く",
+        "expected": [
+          "sigma",
+          "season"
+        ]
+      },
+      {
+        "text": "泉の水は冷たい",
+        "expected": [
+          "sigma",
+          "water"
+        ]
+      },
+      {
+        "text": "バネ仕掛けのおもちゃ",
+        "expected": [
+          "sigma",
+          "mechanical"
+        ]
+      },
+      {
+        "text": "猫が跳躍した",
+        "expected": [
+          "sigma",
+          "leap"
+        ]
+      },
+      {
+        "text": "春の訪れを感じる",
+        "expected": [
+          "sigma",
+          "season"
+        ]
+      },
+      {
+        "text": "温泉に行きたい",
+        "expected": [
+          "sigma",
+          "water"
+        ]
+      },
+      {
+        "text": "スプリングコートを着る",
+        "expected": [
+          "sigma",
+          "season"
+        ]
+      },
+      {
+        "text": "スプリングベッド",
+        "expected": [
+          "sigma",
+          "mechanical"
+        ]
+      },
+      {
+        "text": "春分の日",
+        "expected": [
+          "sigma",
+          "season"
+        ]
+      },
+      {
+        "text": "バネが壊れた",
+        "expected": [
+          "sigma",
+          "mechanical"
+        ]
+      }
+    ]
+  },
+  "court": {
+    "name": "Court (12 turns)",
+    "domain": "IME",
+    "ambiguous_term": "court",
+    "initial_state": {
+      "law": 0.35,
+      "sports": 0.3,
+      "royal": 0.25,
+      "romance": 0.1
+    },
+    "turns": [
+      {
+        "text": "テニスコートで試合",
+        "expected": [
+          "sigma",
+          "sports"
+        ]
+      },
+      {
+        "text": "裁判所で証言",
+        "expected": [
+          "sigma",
+          "law"
+        ]
+      },
+      {
+        "text": "王宮の舞踏会",
+        "expected": [
+          "sigma",
+          "royal"
+        ]
+      },
+      {
+        "text": "彼女に求愛する",
+        "expected": [
+          "sigma",
+          "romance"
+        ]
+      },
+      {
+        "text": "バスケットコート",
+        "expected": [
+          "sigma",
+          "sports"
+        ]
+      },
+      {
+        "text": "最高裁判所の判決",
+        "expected": [
+          "sigma",
+          "law"
+        ]
+      },
+      {
+        "text": "宮廷音楽",
+        "expected": [
+          "sigma",
+          "royal"
+        ]
+      },
+      {
+        "text": "courtship display",
+        "expected": [
+          "sigma",
+          "romance"
+        ]
+      },
+      {
+        "text": "Supreme Court",
+        "expected": [
+          "sigma",
+          "law"
+        ]
+      },
+      {
+        "text": "tennis court surface",
+        "expected": [
+          "sigma",
+          "sports"
+        ]
+      },
+      {
+        "text": "royal court ceremony",
+        "expected": [
+          "sigma",
+          "royal"
+        ]
+      },
+      {
+        "text": "法廷弁護士",
+        "expected": [
+          "sigma",
+          "law"
+        ]
+      }
+    ]
+  },
+  "rag_support": {
+    "name": "RAG Customer Support",
+    "domain": "RAG",
+    "initial_state": {
+      "billing": 0.25,
+      "technical": 0.25,
+      "shipping": 0.25,
+      "returns": 0.25
+    },
+    "turns": [
+      {
+        "text": "I was charged twice for my order",
+        "expected": [
+          "sigma",
+          "billing"
+        ]
+      },
+      {
+        "text": "The app crashes on startup",
+        "expected": [
+          "sigma",
+          "technical"
+        ]
+      },
+      {
+        "text": "My package never arrived",
+        "expected": [
+          "sigma",
+          "shipping"
+        ]
+      },
+      {
+        "text": "How do I get a refund?",
+        "expected": [
+          "sigma",
+          "returns"
+        ]
+      },
+      {
+        "text": "Incorrect invoice amount",
+        "expected": [
+          "sigma",
+          "billing"
+        ]
+      }
+    ]
+  },
+  "rag_trouble": {
+    "name": "RAG Troubleshooting",
+    "domain": "RAG",
+    "initial_state": {
+      "network": 0.25,
+      "hardware": 0.25,
+      "software": 0.25,
+      "database": 0.25
+    },
+    "turns": [
+      {
+        "text": "Connection timeout error",
+        "expected": [
+          "sigma",
+          "network"
+        ]
+      },
+      {
+        "text": "Disk failure detected",
+        "expected": [
+          "sigma",
+          "hardware"
+        ]
+      },
+      {
+        "text": "Application won't start",
+        "expected": [
+          "sigma",
+          "software"
+        ]
+      },
+      {
+        "text": "Query performance degraded",
+        "expected": [
+          "sigma",
+          "database"
+        ]
+      },
+      {
+        "text": "Firewall blocking port 443",
+        "expected": [
+          "sigma",
+          "network"
+        ]
+      }
+    ]
+  },
+  "agent_tasks": {
+    "name": "Agent Task Prioritization",
+    "domain": "Agent",
+    "initial_state": {
+      "email": 0.3,
+      "meeting": 0.3,
+      "coding": 0.2,
+      "review": 0.2
+    },
+    "turns": [
+      {
+        "text": "Urgent customer escalation received",
+        "expected": [
+          "sigma",
+          "email"
+        ]
+      },
+      {
+        "text": "CEO requested 1:1 tomorrow",
+        "expected": [
+          "sigma",
+          "meeting"
+        ]
+      },
+      {
+        "text": "Production bug reported",
+        "expected": [
+          "sigma",
+          "coding"
+        ]
+      },
+      {
+        "text": "PR needs approval before deploy",
+        "expected": [
+          "sigma",
+          "review"
+        ]
+      },
+      {
+        "text": "Customer threatening to churn",
+        "expected": [
+          "sigma",
+          "email"
+        ]
+      },
+      {
+        "text": "All-hands in 10 minutes",
+        "expected": [
+          "sigma",
+          "meeting"
+        ]
+      }
+    ]
+  },
+  "planning_demo": {
+    "name": "Planning Demo Preparation",
+    "domain": "Planning",
+    "initial_state": {
+      "slides": 0.3,
+      "prototype": 0.3,
+      "rehearsal": 0.2,
+      "invite": 0.2
+    },
+    "turns": [
+      {
+        "text": "CEO wants new metrics on slide 5",
+        "expected": [
+          "sigma",
+          "slides"
+        ]
+      },
+      {
+        "text": "Demo environment is broken",
+        "expected": [
+          "sigma",
+          "prototype"
+        ]
+      },
+      {
+        "text": "Need to practice Q&A session",
+        "expected": [
+          "sigma",
+          "rehearsal"
+        ]
+      }
+    ]
+  },
+  "planning_security": {
+    "name": "Planning Security Audit",
+    "domain": "Planning",
+    "initial_state": {
+      "pentest": 0.3,
+      "compliance": 0.3,
+      "training": 0.2,
+      "incident": 0.2
+    },
+    "turns": [
+      {
+        "text": "Critical vulnerability found",
+        "expected": [
+          "sigma",
+          "pentest"
+        ]
+      },
+      {
+        "text": "SOC2 deadline next week",
+        "expected": [
+          "sigma",
+          "compliance"
+        ]
+      },
+      {
+        "text": "Phishing test failed badly",
+        "expected": [
+          "sigma",
+          "training"
+        ]
+      }
+    ]
+  },
+  "planning_resource": {
+    "name": "Planning Resource Allocation",
+    "domain": "Planning",
+    "initial_state": {
+      "hiring": 0.3,
+      "budget": 0.3,
+      "vendor": 0.2,
+      "equipment": 0.2
+    },
+    "turns": [
+      {
+        "text": "Two engineers gave notice",
+        "expected": [
+          "sigma",
+          "hiring"
+        ]
+      },
+      {
+        "text": "Q4 budget cut by 20%",
+        "expected": [
+          "sigma",
+          "budget"
+        ]
+      },
+      {
+        "text": "AWS costs doubled",
+        "expected": [
+          "sigma",
+          "vendor"
+        ]
+      },
+      {
+        "text": "Need 10 more laptops",
+        "expected": [
+          "sigma",
+          "equipment"
+        ]
+      }
+    ]
+  },
+  "planning_priority": {
+    "name": "Planning Priority Shift",
+    "domain": "Planning",
+    "initial_state": {
+      "feature_a": 0.3,
+      "feature_b": 0.3,
+      "bugfix": 0.2,
+      "tech_debt": 0.2
+    },
+    "turns": [
+      {
+        "text": "Major customer wants Feature A",
+        "expected": [
+          "sigma",
+          "feature_a"
+        ]
+      },
+      {
+        "text": "Competitor launched Feature B",
+        "expected": [
+          "sigma",
+          "feature_b"
+        ]
+      },
+      {
+        "text": "Production outage 3 times today",
+        "expected": [
+          "sigma",
+          "bugfix"
+        ]
+      }
+    ]
+  },
+  "multiagent_security": {
+    "name": "Multi-agent Security Review",
+    "domain": "Multi-agent",
+    "initial_state": {
+      "frontend": 0.3,
+      "backend": 0.3,
+      "infra": 0.2,
+      "compliance": 0.2
+    },
+    "turns": [
+      {
+        "text": "XSS vulnerability in form validation",
+        "expected": [
+          "sigma",
+          "frontend"
+        ]
+      },
+      {
+        "text": "SQL injection possible",
+        "expected": [
+          "sigma",
+          "backend"
+        ]
+      },
+      {
+        "text": "Firewall misconfigured",
+        "expected": [
+          "sigma",
+          "infra"
+        ]
+      }
+    ]
+  },
+  "multiagent_ux": {
+    "name": "Multi-agent UX Design",
+    "domain": "Multi-agent",
+    "initial_state": {
+      "designer": 0.3,
+      "researcher": 0.3,
+      "engineer": 0.2,
+      "product": 0.2
+    },
+    "turns": [
+      {
+        "text": "Color contrast failing accessibility",
+        "expected": [
+          "sigma",
+          "designer"
+        ]
+      },
+      {
+        "text": "Users confused by navigation",
+        "expected": [
+          "sigma",
+          "researcher"
+        ]
+      },
+      {
+        "text": "Animation causing performance issues",
+        "expected": [
+          "sigma",
+          "engineer"
+        ]
+      },
+      {
+        "text": "Conversion rate dropped 15%",
+        "expected": [
+          "sigma",
+          "product"
+        ]
+      }
+    ]
+  },
+  "multiagent_market": {
+    "name": "Multi-agent Market Analysis",
+    "domain": "Multi-agent",
+    "initial_state": {
+      "analyst": 0.3,
+      "sales": 0.3,
+      "finance": 0.2,
+      "legal": 0.2
+    },
+    "turns": [
+      {
+        "text": "Competitor acquired startup",
+        "expected": [
+          "sigma",
+          "analyst"
+        ]
+      },
+      {
+        "text": "Enterprise deal at risk",
+        "expected": [
+          "sigma",
+          "sales"
+        ]
+      },
+      {
+        "text": "Revenue forecast off by 30%",
+        "expected": [
+          "sigma",
+          "finance"
+        ]
+      }
+    ]
+  },
+  "multiagent_debt": {
+    "name": "Multi-agent Tech Debt",
+    "domain": "Multi-agent",
+    "initial_state": {
+      "architecture": 0.3,
+      "testing": 0.3,
+      "docs": 0.2,
+      "monitoring": 0.2
+    },
+    "turns": [
+      {
+        "text": "Monolith hitting scale limits",
+        "expected": [
+          "sigma",
+          "architecture"
+        ]
+      },
+      {
+        "text": "Test coverage below 40%",
+        "expected": [
+          "sigma",
+          "testing"
+        ]
+      },
+      {
+        "text": "API docs 6 months outdated",
+        "expected": [
+          "sigma",
+          "docs"
+        ]
+      },
+      {
+        "text": "Cannot debug production issues",
+        "expected": [
+          "sigma",
+          "monitoring"
+        ]
+      }
+    ]
+  },
+  "multimodal_brand": {
+    "name": "Multimodal Brand Refresh",
+    "domain": "Multimodal",
+    "initial_state": {
+      "modern": 0.3,
+      "playful": 0.3,
+      "professional": 0.2,
+      "minimal": 0.2
+    },
+    "turns": [
+      {
+        "text": "Targeting Gen Z audience",
+        "expected": [
+          "sigma",
+          "playful"
+        ]
+      },
+      {
+        "text": "Enterprise clients prefer serious tone",
+        "expected": [
+          "sigma",
+          "professional"
+        ]
+      },
+      {
+        "text": "Competitors all using bright colors",
+        "expected": [
+          "sigma",
+          "modern"
+        ]
+      },
+      {
+        "text": "Apple-style simplicity trending",
+        "expected": [
+          "sigma",
+          "minimal"
+        ]
+      }
+    ]
+  },
+  "multimodal_audience": {
+    "name": "Multimodal Audience Targeting",
+    "domain": "Multimodal",
+    "initial_state": {
+      "students": 0.3,
+      "professionals": 0.3,
+      "seniors": 0.2,
+      "parents": 0.2
+    },
+    "turns": [
+      {
+        "text": "University partnerships signed",
+        "expected": [
+          "sigma",
+          "students"
+        ]
+      },
+      {
+        "text": "LinkedIn ads performing well",
+        "expected": [
+          "sigma",
+          "professionals"
+        ]
+      },
+      {
+        "text": "AARP endorsement received",
+        "expected": [
+          "sigma",
+          "seniors"
+        ]
+      }
+    ]
+  },
+  "multimodal_competitive": {
+    "name": "Multimodal Competitive Positioning",
+    "domain": "Multimodal",
+    "initial_state": {
+      "price": 0.3,
+      "features": 0.3,
+      "support": 0.2,
+      "brand": 0.2
+    },
+    "turns": [
+      {
+        "text": "Competitor dropped prices 40%",
+        "expected": [
+          "sigma",
+          "price"
+        ]
+      },
+      {
+        "text": "We have exclusive AI integration",
+        "expected": [
+          "sigma",
+          "features"
+        ]
+      },
+      {
+        "text": "Customers praise our 24/7 support",
+        "expected": [
+          "sigma",
+          "support"
+        ]
+      },
+      {
+        "text": "Won \"Best Brand\" award",
+        "expected": [
+          "sigma",
+          "brand"
+        ]
+      }
+    ]
+  },
+  "multimodal_abtest": {
+    "name": "Multimodal A/B Test",
+    "domain": "Multimodal",
+    "initial_state": {
+      "variant_a": 0.3,
+      "variant_b": 0.3,
+      "variant_c": 0.2,
+      "control": 0.2
+    },
+    "turns": [
+      {
+        "text": "Variant A: 25% conversion lift",
+        "expected": [
+          "sigma",
+          "variant_a"
+        ]
+      },
+      {
+        "text": "Variant B: High bounce rate",
+        "expected": [
+          "delta",
+          "variant_b"
+        ]
+      },
+      {
+        "text": "Variant C: Best engagement",
+        "expected": [
+          "sigma",
+          "variant_c"
+        ]
+      }
+    ]
+  }
+}

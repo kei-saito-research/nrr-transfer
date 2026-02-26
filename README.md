@@ -1,177 +1,92 @@
 # NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators Under Fixed Interface Constraints
 
-Reference implementation for the paper:
+Reference implementation and manuscript package for:
 
-**"NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators Under Fixed Interface Constraints"**  
-Kei Saito (2026)  
-*Manuscript in preparation* (arXiv submission pending)
+Saito, K. (2026).
+"NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators Under Fixed Interface Constraints"
+(arXiv submission pending)
 
 Part of the Non-Resolution Reasoning (NRR) research program.
-Program Map (series hub): [NRR Program Map](https://github.com/kei-saito-research/nrr-core/blob/main/PROGRAM_MAP.md)
+Program Map (series hub): https://github.com/kei-saito-research/nrr-core/blob/main/PROGRAM_MAP.md
 
----
+NRR is not an anti-LLM framework.
+NRR does not replace standard LLM use.
+NRR optimizes when to commit and when to defer, under explicit conditions.
 
-## Overview
+## Versioning Note
 
-This repository contains the experimental validation code for NRR Phase 1.5 transferability, demonstrating:
+- Local manuscript versions (for example `v28`) and arXiv versions (`v1`, `v2`, ...) are different numbering systems.
+- They do not map 1:1.
+- This repository snapshot tracks the local manuscript `v28`.
 
-- **Cross-domain protocol**: 324 runs and 1,512 turns (18 scenarios x 3 models x 2 temperatures x 3 trials)
-- **100% extraction success** across all runs (1,512/1,512 turns)
-- **Temperature-robust efficiency**: mean difference 0.0072 tokens/turn (T=0.3 vs T=0.0), max absolute difference 0.4444
-- **Operator-pattern generality**: 0%-100% delta usage by scenario while preserving 100% extraction success
+## Current Snapshot (v28-aligned)
 
----
+- Protocol: 18 scenarios x 3 models x 2 temperatures x 3 trials
+- Total runs: 324
+- Total turns: 1,512
+- Extraction success: 100% (1512/1512)
+- Scenario-model mean tokens/turn:
+  - T=0.0: 65.7205
+  - T=0.3: 65.7277
+  - Mean delta (0.3 - 0.0): 0.0072
+  - Max absolute delta: 0.4444
 
 ## Repository Structure
 
 ```
 nrr-transfer/
-├── README.md                        # This file
-├── requirements.txt                 # Python dependencies
-├── experiments/
-│   ├── cross_domain_validation.py   # 18-scenario validation
-│   ├── operator_analysis.py         # Operator selection patterns
-│   └── experimental_data.json       # Complete experimental results
-└── figures/
-    ├── generate_fig1.py             # Operator selection heatmap
-    └── generate_fig2.py             # Domain summary charts
+|-- README.md
+|-- LICENSE
+|-- requirements.txt
+|-- reproducibility.md
+|-- manuscript/
+|   |-- paper5-nrr-transfer-v28.tex
+|   |-- paper5-nrr-transfer-v28.pdf
+|   |-- paper5_fig1_horizontal_v2.png
+|   |-- paper5_fig2_all_domains.png
+|   |-- paper5_fig3_structural_similarity.png
+|   |-- paper5_fig4_operator_heatmap.png
+|   |-- figures/                     # mirrored manuscript figure assets
+|   `-- archive/                     # reserved for older manuscript drafts
+|-- data/
+|   |-- universal_scenarios.json
+|   `-- results/
+|       `-- universal_3trial_results.json
+|-- experiments/
+|   `-- run_universal_3trial.py
+|-- figures/
+|   |-- generate_figures_from_results.py
+|   |-- paper5_fig2_all_domains.png
+|   `-- paper5_fig4_operator_heatmap.png
+`-- archive/
+    `-- legacy_pre_v28_2026-02-26/   # previous scripts/data kept for traceability
 ```
 
----
+## Legacy Handling
 
-## Quick Start
-
-### Installation
-
-```bash
-pip install -r requirements.txt
-```
-
-### Run Experiments
-
-**Cross-Domain Validation (18 scenarios):**
-```bash
-python experiments/cross_domain_validation.py
-```
-
-**Operator Analysis:**
-```bash
-python experiments/operator_analysis.py
-```
-
-Output shows operator selection patterns across all scenarios, demonstrating 0%-100% variation.
-
-### Generate Figures
-
-```bash
-python figures/generate_fig1.py  # Operator selection heatmap
-python figures/generate_fig2.py  # Domain summary charts
-```
-
-Figures will be saved in the `figures/` directory.
-
----
-
-## Experimental Data
-
-All experimental results are stored in `experiments/experimental_data.json`:
-
-- Full protocol logs for 324 runs (18 scenarios x 3 models x 2 temperatures x 3 trials)
-- Turn-by-turn operator extraction (1,512 turns total)
-- Token consumption statistics and temperature robustness metrics
-- Operator selection patterns by domain and scenario
-
----
-
-## Key Results (Paper-Aligned)
-
-- **Total runs**: 324
-- **Total turns**: 1,512
-- **Extraction success**: 100% (1,512/1,512)
-- **Overall efficiency**:
-  - T=0.0: 65.720 tokens/turn (scenario-model mean)
-  - T=0.3: 65.728 tokens/turn (scenario-model mean)
-  - Mean delta (0.3 - 0.0): 0.0072 tokens/turn
-  - Max absolute temperature difference: 0.4444
-
-### Per-Domain Token Usage (T=0.3, averaged across models)
-
-| Domain | Avg tokens/turn |
-|--------|------------------|
-| IME | 76.5 |
-| RAG | 69.6 |
-| Agent | 64.1 |
-| Planning | 63.6 |
-| Multi-agent | 61.0 |
-| Multimodal | 63.0 |
-| **Overall (18 scenarios)** | **65.7** |
-
-### Operator Selection (all 324 runs)
-
-- Objective-leaning domains (IME, RAG, Agent): 686 sigma (88.6%), 88 delta (11.4%)
-- Subjective-heavy domains (Planning, Multi-agent, Multimodal): 189 sigma (25.6%), 549 delta (74.4%)
-- Overall: 875 sigma (57.9%), 637 delta (42.1%)
-- Scenario-level usage spans 0%-100% delta while maintaining 100% extraction success
-
----
-
-## Citation
-
-If you use this code, please cite:
-
-```bibtex
-@article{saito2026universal,
-  title={NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators Under Fixed Interface Constraints},
-  author={Saito, Kei},
-  journal={arXiv preprint},
-  year={2026},
-  note={Manuscript in preparation}
-}
-```
-
----
-
-## Related Repositories
-
-- [NRR-Core](https://github.com/kei-saito-research/nrr-core) - Foundational framework
-- [NRR-Phi](https://github.com/kei-saito-research/nrr-phi) - Text-to-state mapping
-- [NRR-IME](https://github.com/kei-saito-research/nrr-ime) - Structure-aware optimization
-
----
+To avoid losing history, pre-v28 transfer scripts and datasets are not deleted.
+They are moved to `archive/legacy_pre_v28_2026-02-26/` and are not used as claim-source artifacts for manuscript v28.
 
 ## Reproducibility
 
-See [`reproducibility.md`](./reproducibility.md) for environment, fixed settings, runnable commands, and artifact mapping.
+See `reproducibility.md` for:
+- fixed settings
+- run commands
+- artifact mapping from data to manuscript figures/claims
 
----
+## Related Repositories
 
-## Commercial Use
-
-If you plan to use this in a commercial or production setting,
-a short message would be appreciated.
+- https://github.com/kei-saito-research/nrr-core
+- https://github.com/kei-saito-research/nrr-phi
+- https://github.com/kei-saito-research/nrr-ime
 
 ## License
 
-CC BY 4.0 License. See [LICENSE](LICENSE).
-
----
-
-## Reproduction & Issue Reports
-
-If you reproduce results, find discrepancies, or hit bugs, please open an issue:
-- https://github.com/kei-saito-research/nrr-transfer/issues
-
-Please include:
-- environment (OS, Python version)
-- command you ran
-- commit hash (if applicable)
-- observed output/error logs
-
----
+CC BY 4.0. See `LICENSE`.
 
 ## Contact
 
-Kei Saito  
-Independent Researcher, Japan  
-ORCID: [0009-0006-4715-9176](https://orcid.org/0009-0006-4715-9176)  
+Kei Saito
+Independent Researcher, Japan
+ORCID: https://orcid.org/0009-0006-4715-9176
 Email: kei.saito.research@gmail.com
