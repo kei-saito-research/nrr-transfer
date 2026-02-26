@@ -1,10 +1,6 @@
 # NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators Under Fixed Interface Constraints
 
-Reference implementation and manuscript package for:
-
-Saito, K. (2026).
-"NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators Under Fixed Interface Constraints"
-(arXiv submission pending)
+Reference implementation package (code/data) for the NRR-Transfer study.
 
 Part of the Non-Resolution Reasoning (NRR) research program.
 Program Map (series hub): https://github.com/kei-saito-research/nrr-core/blob/main/PROGRAM_MAP.md
@@ -13,13 +9,12 @@ NRR is not an anti-LLM framework.
 NRR does not replace standard LLM use.
 NRR optimizes when to commit and when to defer, under explicit conditions.
 
-## Versioning Note
+## Publication handling
 
-- Local manuscript versions (for example `v28`) and arXiv versions (`v1`, `v2`, ...) are different numbering systems.
-- They do not map 1:1.
-- This repository snapshot tracks the local manuscript `v28`.
+- This repository is a reproducibility package (code/data/figures).
+- Manuscript text files (`.tex`, `.pdf`) are intentionally not included in this pre-arXiv snapshot.
 
-## Current Snapshot (v28-aligned)
+## Current protocol snapshot
 
 - Protocol: 18 scenarios x 3 models x 2 temperatures x 3 trials
 - Total runs: 324
@@ -31,7 +26,7 @@ NRR optimizes when to commit and when to defer, under explicit conditions.
   - Mean delta (0.3 - 0.0): 0.0072
   - Max absolute delta: 0.4444
 
-## Repository Structure
+## Repository structure
 
 ```
 nrr-transfer/
@@ -39,15 +34,6 @@ nrr-transfer/
 |-- LICENSE
 |-- requirements.txt
 |-- reproducibility.md
-|-- manuscript/
-|   |-- paper5-nrr-transfer-v28.tex
-|   |-- paper5-nrr-transfer-v28.pdf
-|   |-- paper5_fig1_horizontal_v2.png
-|   |-- paper5_fig2_all_domains.png
-|   |-- paper5_fig3_structural_similarity.png
-|   |-- paper5_fig4_operator_heatmap.png
-|   |-- figures/                     # mirrored manuscript figure assets
-|   `-- archive/                     # reserved for older manuscript drafts
 |-- data/
 |   |-- universal_scenarios.json
 |   `-- results/
@@ -62,19 +48,16 @@ nrr-transfer/
     `-- legacy_pre_v28_2026-02-26/   # previous scripts/data kept for traceability
 ```
 
-## Legacy Handling
+## Legacy handling
 
-To avoid losing history, pre-v28 transfer scripts and datasets are not deleted.
-They are moved to `archive/legacy_pre_v28_2026-02-26/` and are not used as claim-source artifacts for manuscript v28.
+Pre-v28 transfer scripts and datasets are preserved in `archive/legacy_pre_v28_2026-02-26/`.
+They are retained for traceability and are not claim-source artifacts for the current snapshot.
 
 ## Reproducibility
 
-See `reproducibility.md` for:
-- fixed settings
-- run commands
-- artifact mapping from data to manuscript figures/claims
+See `reproducibility.md` for fixed settings, run commands, and artifact mapping.
 
-## Related Repositories
+## Related repositories
 
 - https://github.com/kei-saito-research/nrr-core
 - https://github.com/kei-saito-research/nrr-phi
