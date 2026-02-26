@@ -1,6 +1,6 @@
 # NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators Under Fixed Interface Constraints
 
-Reference implementation package (code/data) for the NRR-Transfer study.
+Reference implementation package (code/schema/scripts) for the NRR-Transfer study.
 
 Part of the Non-Resolution Reasoning (NRR) research program.
 Program Map (series hub): https://github.com/kei-saito-research/nrr-core/blob/main/PROGRAM_MAP.md
@@ -11,20 +11,15 @@ NRR optimizes when to commit and when to defer, under explicit conditions.
 
 ## Publication handling
 
-- This repository is a reproducibility package (code/data/figures).
+- This repository is a reproducibility package (code/schema/scripts).
 - Manuscript text files (`.tex`, `.pdf`) are intentionally not included in this pre-arXiv snapshot.
+- Full run outputs and generated final figure PNGs are intentionally not included before arXiv posting.
 
-## Current protocol snapshot
+## Current protocol shape
 
 - Protocol: 18 scenarios x 3 models x 2 temperatures x 3 trials
-- Total runs: 324
-- Total turns: 1,512
-- Extraction success: 100% (1512/1512)
-- Scenario-model mean tokens/turn:
-  - T=0.0: 65.7205
-  - T=0.3: 65.7277
-  - Mean delta (0.3 - 0.0): 0.0072
-  - Max absolute delta: 0.4444
+- Re-run script: `experiments/run_universal_3trial.py`
+- Scenario schema: `data/universal_scenarios.json`
 
 ## Repository structure
 
@@ -37,21 +32,20 @@ nrr-transfer/
 |-- data/
 |   |-- universal_scenarios.json
 |   `-- results/
-|       `-- universal_3trial_results.json
+|       `-- README.md              # output policy (pre-submission)
 |-- experiments/
 |   `-- run_universal_3trial.py
 |-- figures/
 |   |-- generate_figures_from_results.py
-|   |-- paper5_fig2_all_domains.png
-|   `-- paper5_fig4_operator_heatmap.png
+|   `-- README.md                  # output policy (pre-submission)
 `-- archive/
     `-- legacy_pre_v28_2026-02-26/   # previous scripts/data kept for traceability
 ```
 
 ## Legacy handling
 
-Pre-v28 transfer scripts and datasets are preserved in `archive/legacy_pre_v28_2026-02-26/`.
-They are retained for traceability and are not claim-source artifacts for the current snapshot.
+Pre-v28 transfer scripts are preserved in `archive/legacy_pre_v28_2026-02-26/`.
+Legacy full-result datasets are not included in this pre-submission snapshot.
 
 ## Reproducibility
 

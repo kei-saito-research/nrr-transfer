@@ -2,14 +2,25 @@
 import json
 import statistics
 import collections
+import os
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 
 ROOT = Path(__file__).resolve().parents[1]
-RESULTS = ROOT / "data" / "results" / "universal_3trial_results.json"
+RESULTS = Path(
+    os.getenv(
+        "TRANSFER_RESULTS_JSON",
+        str(ROOT / "data" / "results" / "universal_3trial_results.json"),
+    )
+)
 OUT2 = ROOT / "figures" / "paper5_fig2_all_domains.png"
 OUT4 = ROOT / "figures" / "paper5_fig4_operator_heatmap.png"
+
+if not RESULTS.exists():
+    raise FileNotFoundError(
+        f"Results JSON not found: {RESULTS}. Set TRANSFER_RESULTS_JSON to a private output file."
+    )
 
 scenario_order = [
     "bank","spring","court",

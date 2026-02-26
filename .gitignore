@@ -1,3 +1,6 @@
 .DS_Store
 __pycache__/
 *.pyc
+data/results/universal_3trial_results.json
+figures/paper5_fig2_all_domains.png
+figures/paper5_fig4_operator_heatmap.png
