@@ -1,6 +1,15 @@
 # NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators Under Fixed Interface Constraints
 
-Reference implementation package (code/schema/scripts) for the NRR-Transfer study.
+NRR-Transfer is a cross-domain package for testing **ambiguity-preserving inference** outside a single benchmark domain. It evaluates when to avoid **premature commitment in LLM decoding**, how to reduce **semantic collapse** across scenarios, and how to apply a practical **defer vs commit** policy under fixed interface constraints. The repository is intentionally pre-public and minimal: code/schema/scripts for reproducibility are included, while manuscript text and full run outputs are withheld until publication timing allows. The goal is measurable transfer behavior across models and temperatures without inflating claims or hiding boundary conditions. The emphasis is controlled comparison and transparent limits, so users can distinguish transportable behavior from setup-specific effects.
+
+**Quick links**
+- arXiv: pending (pre-submission; no public URL yet)
+- [Positioning (NRR vs related approaches)](./docs/positioning.md)
+- [Search Keywords and Weekly Rank Log](./docs/keywords.md)
+
+**EN/JA query terms**
+- `early commitment` = `早期確定`
+- `ambiguity-preserving inference` = `曖昧性保持推論`
 
 Part of the Non-Resolution Reasoning (NRR) research program.
 Program Map (series hub): https://github.com/kei-saito-research/nrr-core/blob/main/PROGRAM_MAP.md
