@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 RESULTS = Path(
     os.getenv(
         "TRANSFER_RESULTS_JSON",
-        str(ROOT / "data" / "results" / "universal_3trial_results.json"),
+        str(ROOT / "data" / "results" / "transfer_3trial_results.json"),
     )
 )
 OUT2 = ROOT / "figures" / "paper5_fig2_all_domains.png"

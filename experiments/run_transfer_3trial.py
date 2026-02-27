@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Universal (Paper 5) rebuild experiment runner.
+Transfer (Paper 5) rebuild experiment runner.
 
 Design:
 - Main line (IME-aligned): temp=0.3, 3 trials, 3 models
@@ -25,7 +25,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 
-UNIVERSAL_SCENARIOS = [
+TRANSFER_SCENARIOS = [
     "bank",
     "spring",
     "court",
@@ -69,7 +69,7 @@ class RunConfig:
 
 
 class StateManager:
-    """Deterministic state transitions used in previous unified experiments."""
+    """Deterministic state transitions used in previous transfer experiments."""
 
     def __init__(self) -> None:
         self.states: Dict[str, Dict[str, Dict[str, float]]] = {}
@@ -440,12 +440,12 @@ def save_json(path: str, payload: Dict[str, Any]) -> None:
 
 
 def parse_args() -> RunConfig:
-    parser = argparse.ArgumentParser(description="Run Universal 3-trial rebuild experiments.")
-    parser.add_argument("--notebook", help="Path to nrr_unified_experiments_final.ipynb")
+    parser = argparse.ArgumentParser(description="Run Transfer 3-trial rebuild experiments.")
+    parser.add_argument("--notebook", help="Path to source notebook (legacy compatibility)")
     parser.add_argument("--scenarios-json", help="Path to scenarios JSON (preferred for standalone runs)")
     parser.add_argument(
         "--out",
-        default=f"universal_3trial_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+        default=f"transfer_3trial_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
         help="Output json path",
     )
     parser.add_argument("--trials", type=int, default=3)
@@ -488,7 +488,7 @@ def main() -> None:
         scenarios = load_scenarios_from_notebook(cfg.notebook_path)
     else:
         raise ValueError("Provide either --scenarios-json or --notebook.")
-    missing = [k for k in UNIVERSAL_SCENARIOS if k not in scenarios]
+    missing = [k for k in TRANSFER_SCENARIOS if k not in scenarios]
     if missing:
         raise ValueError(f"Missing scenarios in notebook: {missing}")
 
@@ -496,7 +496,7 @@ def main() -> None:
     for model in cfg.models:
         for temp in cfg.temperatures:
             for trial in range(1, cfg.trials + 1):
-                for scenario_key in UNIVERSAL_SCENARIOS:
+                for scenario_key in TRANSFER_SCENARIOS:
                     tasks.append(
                         {
                             "model": model,
@@ -510,7 +510,7 @@ def main() -> None:
     payload: Dict[str, Any] = {
         "metadata": {
             "created_at": datetime.now().isoformat(),
-            "script": "universal_rebuild_3trial.py",
+            "script": "run_transfer_3trial.py",
             "models": {m: MODEL_IDS[m] for m in cfg.models},
             "trials": cfg.trials,
             "temperatures": cfg.temperatures,

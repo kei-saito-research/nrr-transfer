@@ -31,8 +31,8 @@ NRR optimizes when to commit and when to defer, under explicit conditions.
 ## Current protocol shape
 
 - Protocol: 18 scenarios x 3 models x 2 temperatures x 3 trials
-- Re-run script: `experiments/run_universal_3trial.py`
-- Scenario schema: `data/universal_scenarios.json`
+- Re-run script: `experiments/run_transfer_3trial.py`
+- Scenario schema: `data/transfer_scenarios.json`
 
 ## Repository structure
 
@@ -43,11 +43,11 @@ nrr-transfer/
 |-- requirements.txt
 |-- reproducibility.md
 |-- data/
-|   |-- universal_scenarios.json
+|   |-- transfer_scenarios.json
 |   `-- results/
 |       `-- README.md              # output policy (pre-submission)
 |-- experiments/
-|   `-- run_universal_3trial.py
+|   `-- run_transfer_3trial.py
 |-- figures/
 |   |-- generate_figures_from_results.py
 |   `-- README.md                  # output policy (pre-submission)

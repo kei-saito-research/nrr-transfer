@@ -1,6 +1,6 @@
 # NRR Positioning: Ambiguity-Preserving Inference vs Nearby Methods
 
-NRR targets **ambiguity-preserving inference** for practical LLM systems. The main risk addressed is **premature commitment in LLM decoding** and downstream rework from **semantic collapse**. NRR controls **defer vs commit** timing under explicit conditions rather than forcing universal abstention or universal commitment.
+NRR targets **ambiguity-preserving inference** for practical LLM systems. The main risk addressed is **premature commitment in LLM decoding** and downstream rework from **semantic collapse**. NRR controls **defer vs commit** timing under explicit conditions rather than forcing blanket abstention or blanket commitment.
 
 ## NRR vs Nearby Concepts (What It Solves / Does Not Solve)
 
@@ -13,7 +13,7 @@ NRR targets **ambiguity-preserving inference** for practical LLM systems. The ma
 ## Boundary Conditions
 
 - NRR is not anti-LLM and does not replace standard LLM use.
-- Do not claim: NRR is a universal replacement for standard LLM usage.
+- Do not claim: NRR is a blanket replacement for standard LLM usage.
 - NRR is evaluated as conditional utility under specific tasks and protocols.
 - This page is for positioning; formal definitions remain in manuscript and reproducibility docs.
 

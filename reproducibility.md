@@ -39,9 +39,9 @@ export ANTHROPIC_API_KEY="..."
 export OPENAI_API_KEY="..."
 export GEMINI_API_KEY="..."   # or GOOGLE_API_KEY
 
-python3 experiments/run_universal_3trial.py \
-  --scenarios-json data/universal_scenarios.json \
-  --out /path/to/private_outputs/universal_3trial_results.json \
+python3 experiments/run_transfer_3trial.py \
+  --scenarios-json data/transfer_scenarios.json \
+  --out /path/to/private_outputs/transfer_3trial_results.json \
   --trials 3 \
   --temperatures 0.3,0.0 \
   --models claude,gpt,gemini \
@@ -64,7 +64,7 @@ Note: keep generated PNGs outside committed files before arXiv posting.
 ## Artifact map
 
 - Scenario definitions:
-  - `data/universal_scenarios.json`
+  - `data/transfer_scenarios.json`
 - Figure generation script:
   - `figures/generate_figures_from_results.py`
 - Output policy notes:
