@@ -2,8 +2,8 @@
 
 ## Scope
 
-This repository snapshot provides reproducibility assets (code/schema/scripts).
-Manuscript text files (`.tex`, `.pdf`) and full run outputs are intentionally excluded in this pre-arXiv state.
+This repository snapshot provides manuscript and reproducibility assets (code/schema/scripts).
+Full run outputs are intentionally excluded in this pre-arXiv state.
 
 Legacy pre-v28 materials:
 - `archive/legacy_pre_v28_2026-02-26/`

@@ -1,6 +1,6 @@
 # NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators Under Fixed Interface Constraints
 
-NRR-Transfer is a cross-domain package for testing **ambiguity-preserving inference** outside a single benchmark domain. It evaluates when to avoid **premature commitment in LLM decoding**, how to reduce **semantic collapse** across scenarios, and how to apply a practical **defer vs commit** policy under fixed interface constraints. The repository is intentionally pre-public and minimal: code/schema/scripts for reproducibility are included, while manuscript text and full run outputs are withheld until publication timing allows. The goal is measurable transfer behavior across models and temperatures without inflating claims or hiding boundary conditions. The emphasis is controlled comparison and transparent limits, so users can distinguish transportable behavior from setup-specific effects.
+NRR-Transfer is a cross-domain package for testing **ambiguity-preserving inference** outside a single benchmark domain. It evaluates when to avoid **premature commitment in LLM decoding**, how to reduce **semantic collapse** across scenarios, and how to apply a practical **defer vs commit** policy under fixed interface constraints. This repository includes manuscript artifacts together with code/schema/scripts for reproducibility. The goal is measurable transfer behavior across models and temperatures without inflating claims or hiding boundary conditions. The emphasis is controlled comparison and transparent limits, so users can distinguish transportable behavior from setup-specific effects.
 
 **Quick links**
 - arXiv: pending (pre-submission; no public URL yet)
@@ -24,8 +24,8 @@ NRR optimizes when to commit and when to defer, under explicit conditions.
 
 ## Publication handling
 
-- This repository is a reproducibility package (code/schema/scripts).
-- Manuscript text files (`.tex`, `.pdf`) are intentionally not included in this pre-arXiv snapshot.
+- This repository includes manuscript and reproducibility assets.
+- Current manuscript snapshot is stored under `manuscript/current/`.
 - Full run outputs and generated final figure PNGs are intentionally not included before arXiv posting.
 
 ## Current protocol shape
@@ -42,6 +42,15 @@ nrr-transfer/
 |-- LICENSE
 |-- requirements.txt
 |-- reproducibility.md
+|-- manuscript/
+|   `-- current/
+|       |-- paper5-nrr-transfer-v28.tex
+|       |-- paper5-nrr-transfer-v28.pdf
+|       |-- paper5_fig1_horizontal_v2.png
+|       |-- paper5_fig2_all_domains.png
+|       |-- paper5_fig3_structural_similarity.png
+|       |-- paper5_fig4_operator_heatmap.png
+|       `-- checksums_sha256.txt
 |-- data/
 |   |-- transfer_scenarios.json
 |   `-- results/

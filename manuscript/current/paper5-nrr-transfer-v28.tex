@@ -1,0 +1,1042 @@
+\documentclass[11pt,a4paper]{article}
+
+%==============================================================================
+% PREAMBLE
+%==============================================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage[numbers]{natbib}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{listings}
+
+% Page geometry
+\geometry{
+  left=2.5cm,
+  right=2.5cm,
+  top=2.5cm,
+  bottom=2.5cm
+}
+
+% Theorem environments
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Definition}
+
+% Listings style
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny,
+    tabsize=2
+}
+
+%==============================================================================
+% TITLE AND AUTHOR
+%==============================================================================
+
+\title{\textbf{NRR-Transfer: Cross-Domain Transfer of Phase 1.5 Operators Under Fixed Interface Constraints}}
+
+\author{
+    Kei Saito\thanks{ORCID: 0009-0006-4715-9176} \\
+    Independent Researcher, Japan \\
+    \texttt{kei.saito.research@gmail.com}
+}
+
+\date{February 2026 \\[0.5em]
+\textit{Part of the Non-Resolution Reasoning (NRR) research program.}}
+
+\begin{document}
+
+\maketitle
+
+\begin{center}
+\textcopyright\ 2026 Kei Saito.
+Licensed under CC BY 4.0.\\
+\url{https://creativecommons.org/licenses/by/4.0/}
+\end{center}
+
+%==============================================================================
+% ABSTRACT
+%==============================================================================
+
+\begin{abstract}
+Stateful reasoning tasks---managing semantic ambiguity, tracking document relevance, prioritizing agent actions---require persistent state management across multiple interactions with stateless LLM APIs. Phase 1.5, discovered during the implementation of the Interpretation Management Engine (IME) for Non-Resolution Reasoning (NRR), provides an operator-based solution by separating decision-making (LLM selects strengthen/dampen operators) from state execution (client applies deterministic updates). This paper tests whether that pattern is transferable across domains under fixed interface constraints. We validate Phase 1.5 across six semantically distinct domains (IME, RAG, Agent, Planning, Multi-agent, Multimodal) under an IME-aligned protocol (3 models $\times$ 2 temperatures $\times$ 3 trials), totaling 324 runs (1,512 turns). Results show 100\% extraction success across the 324-run protocol and temperature-robust efficiency: mean difference between $T{=}0.3$ and $T{=}0.0$ is 0.0072 tokens/turn, with maximum absolute difference 0.4444 across scenario-model pairs. Operator selection varies substantially across domains and conditions, yet the interface remains stable without domain-specific redesign. These findings support a central claim: cross-domain transferability is the primary empirical result, rather than task-specific optimization, and NRR contributes the design principle that makes this transfer implementable.
+
+\textbf{Implementation}: A reference implementation accompanying this work 
+is available at \url{https://github.com/kei-saito-research/nrr-transfer}.
+
+\textbf{Series status note (as of February 26, 2026)}: NRR-IME is treated as
+under moderation in this series, and this manuscript does not assume IME acceptance.
+\end{abstract}
+
+\noindent\textbf{Keywords:} Phase 1.5, cross-domain transfer, Non-Resolution Reasoning, cross-domain validation, operator abstraction, stateful reasoning, LLM architecture
+
+%==============================================================================
+% SECTION 1: INTRODUCTION
+%==============================================================================
+
+\section{Introduction}
+\label{sec:introduction}
+
+This paper is one module in an ongoing Non-Resolution Reasoning (NRR) research program, not a closed endpoint. Companion papers cover foundational theory, text-to-state mapping, and implementation strategy with distinct scopes. A series-level Program Map and update status will be maintained in repository documentation.
+
+Large language models accessed via stateless APIs (e.g., OpenAI, Anthropic, Google) have no inherent memory between requests. Yet many real-world applications require stateful reasoning: tracking which interpretations of an ambiguous term remain plausible, maintaining document relevance scores in conversational search, or dynamically prioritizing tasks as an agent's context evolves. The standard approach sends the complete state to the LLM each turn, incurring token costs that grow linearly with state complexity and conversation length.
+
+Non-Resolution Reasoning (NRR)~\cite{saito2025nrr} proposed a framework for managing semantic ambiguity without forcing premature resolution to single interpretations. Rather than asking "Which meaning is correct?", NRR maintains multiple plausible interpretations with dynamic weights, allowing ambiguity to persist until context naturally resolves it. Implementing this idea efficiently on stateless APIs led to Phase 1.5 operator abstraction.
+Accordingly, validity is condition-indexed rather than unconditional.
+A state update is treated as valid under current context and interface constraints, not as universally valid across all contexts.
+NRR is not an anti-LLM framework.
+NRR does not replace standard LLM use.
+NRR optimizes when to commit and when to defer, under explicit conditions.
+
+Phase 1.5, first identified during the implementation of the Interpretation Management Engine (IME)~\cite{saito2026ime}---a system for managing semantic ambiguity using NRR principles---provides a solution. The core insight is to separate decision-making (performed by the LLM) from state execution (performed deterministically on the client). The LLM selects only \textit{what} to change, while the client executes \textit{how} to change it. As of February 26, 2026, IME is handled as an under-moderation companion manuscript, and the claims here are based on reproducible artifacts rather than acceptance status.
+
+However, a critical question emerged: \textit{Is Phase 1.5 specific to ambiguity management, or does it represent a more fundamental interface?} While Phase 1.5 was discovered in the context of NRR and semantic interpretation, its efficiency stems from separation of concerns, not from ambiguity-specific content. This suggests broader applicability to any stateful reasoning task over weighted items.
+
+To test this hypothesis, we extend Phase 1.5 beyond its origins in ambiguity management to six semantically distinct domains:
+
+\begin{enumerate}
+    \item \textbf{IME (Interpretation Management)}: Managing semantic ambiguity with multiple plausible interpretations (e.g., "bank" = financial institution vs. riverbank)
+    \item \textbf{RAG (Retrieval-Augmented Generation)}: Tracking document relevance in conversational search
+    \item \textbf{Agent}: Prioritizing tasks in dynamic environments
+    \item \textbf{Planning}: Managing project tasks where constraints and priorities shift based on external events
+    \item \textbf{Multi-agent}: Integrating conflicting expert perspectives from different specialists
+    \item \textbf{Multimodal}: Navigating design spaces with subjective aesthetic judgments
+\end{enumerate}
+
+These six domains span critical dimensions of reasoning tasks. The first three (IME, RAG, Agent) involve relatively objective criteria---semantic plausibility, document relevance, task urgency. The latter three (Planning, Multi-agent, Multimodal) require subjective judgment---resource constraints, expert credibility, aesthetic preferences. Together, they test whether Phase 1.5 represents a truly generic interface for stateful reasoning.
+
+\subsection{Contributions}
+
+This paper makes the following contributions:
+
+\begin{enumerate}
+    \item \textbf{Cross-domain validation}: We evaluate Phase 1.5 across six semantically distinct domains (IME, RAG, Agent, Planning, Multi-agent, Multimodal).
+    \item \textbf{IME-aligned protocol}: We run 3 models $\times$ 2 temperatures $\times$ 3 trials (324 runs / 1,512 turns), achieving 100\% operator extraction success.
+    \item \textbf{Temperature robustness}: We show mean token difference of 0.0072 tokens/turn between $T{=}0.3$ and $T{=}0.0$ (max absolute difference: 0.4444).
+    \item \textbf{Cross-domain transfer}: We demonstrate consistent performance independent of domain semantics, despite substantial operator-pattern variation.
+    \item \textbf{NRR-derived design rationale}: We trace this generality to a separation principle first operationalized in NRR/IME: semantic decision in the LLM, deterministic state mechanics in the client.
+    \item \textbf{Architectural guidance}: We provide concrete principles for building non-monolithic LLM systems with operator-based state management.
+\end{enumerate}
+
+\subsection{Series Alignment: Notation and Metrics}
+
+\textbf{Notation contract.} Transfer uses item-level operators for execution
+($\sigma_{\text{item}}, \delta_{\text{item}}$), abbreviated as $\sigma,\delta$
+after definition. This is distinct from state-level operators in NRR-Phi
+(e.g., $\sigma_{\mathrm{state}}$ calibration); the symbol family is shared but
+the operation level differs.
+
+\textbf{Metric contract.} This paper primarily evaluates interface transfer
+behavior (extraction reliability and token efficiency across domains). These
+operational metrics complement, but do not replace, foundational non-collapse
+metrics reported in Core/Phi.
+
+\textbf{Boundary statement.} ``Success'' in this paper denotes successful
+operator-target extraction and stable update execution under tested conditions;
+it is not a universal task-quality guarantee.
+
+%==============================================================================
+% SECTION 2: BACKGROUND
+%==============================================================================
+
+\section{Background}
+\label{sec:background}
+
+\subsection{From Non-Resolution Reasoning to Phase 1.5}
+
+Non-Resolution Reasoning (NRR)~\cite{saito2025nrr} proposed a framework for managing semantic ambiguity without forcing premature resolution. Consider the word "bank" in the sentence "I went to the bank." Without additional context, NRR maintains both interpretations---financial institution and riverbank---as weighted possibilities rather than collapsing to a single meaning.
+
+Traditional NLP systems resolve ambiguity immediately, often incorrectly. NRR instead preserves multiple interpretations, adjusting their relative plausibility as context accumulates. This requires efficient state management: tracking interpretation weights across multiple LLM interactions without incurring prohibitive token costs.
+
+The Interpretation Management Engine (IME)~\cite{saito2026ime} was developed to implement NRR principles. During IME's development, a critical pattern emerged: rather than sending complete interpretation states to the LLM each turn (expensive), we could expose only \textit{labels} and let the LLM select simple operators (\textit{strengthen} or \textit{dampen}). The client would then execute these operators deterministically to update weights.
+
+This pattern---later formalized as Phase 1.5---achieved dramatic efficiency gains (74--78\% token reduction) while maintaining full reasoning capability. Crucially, the pattern's efficiency stemmed not from ambiguity-specific properties, but from a more fundamental architectural principle: \textit{separating decision (what to change) from execution (how to change it)}.
+
+This observation suggested Phase 1.5 might generalize beyond ambiguity management to any stateful reasoning task involving weighted items. The present work tests this hypothesis across six diverse domains.
+
+\subsection{Phase 1.5 Operator Abstraction}
+
+Phase 1.5 is an operator-based approach to stateful reasoning on stateless LLM APIs. The core pattern consists of three components:
+
+\begin{enumerate}
+    \item \textbf{State representation}: Weighted items $\{(i_1, w_1), (i_2, w_2), \ldots, (i_n, w_n)\}$ where $\sum w_i = 1$
+    \item \textbf{LLM decision}: Given only item labels and context, the LLM selects an operator ($\sigma$ or $\delta$) and target item
+    \item \textbf{Client execution}: The client applies the selected operator deterministically to update weights
+\end{enumerate}
+
+The two operators are designed to satisfy operator design principles (NRR-Phi~\cite{saito2026phi}, Appendix~D) through 
+proportional weight redistribution~\cite{saito2026ime}:
+\begin{itemize}
+    \item $\sigma$ (\textit{strengthen}): Increase target weight by redistributing weight from other items proportionally\footnote{These operators ($\sigma$, $\delta$) act on individual items within a state, implementing the relative structure preservation principle from NRR-Phi (\cite{saito2026phi}, Appendix~D) through proportional redistribution. This differs from state-level components in NRR-Phi (e.g., $\sigma_{\mathrm{state}}$ calibration and $\delta$ v2 dampening), which transform entire weight distributions globally. Both preserve non-collapse through proportional relationships, but at different levels of abstraction.}
+    \item $\delta$ (\textit{dampen}): Decrease target weight by redistributing it to other items proportionally
+\end{itemize}
+
+\noindent\textit{Note:} These operators act on individual items, implementing 
+NRR's relative structure preservation principle~(\cite{saito2026phi}, Appendix~D) via proportional 
+redistribution. This differs from the global state-level operators introduced 
+in NRR-Phi (\cite{saito2026phi}, Appendix~D).
+
+\textbf{Relationship to NRR operators}: These operators implement the 
+\textit{relative structure preservation principle} identified in NRR-Phi (\cite{saito2026phi}, Appendix~D) as 
+critical for non-collapse. By maintaining proportional relationships during 
+weight updates, they avoid the uniform subtraction shown to cause 
+up to 17.8\% collapse rate \cite{saito2026phi}. The difference is one of abstraction level: NRR-Phi Appendix~D 
+defines mathematical properties operators must satisfy; NRR-IME \cite{saito2026ime} and this work 
+demonstrate practical implementations satisfying those properties.
+
+\textbf{Key insight}: In this interface, the LLM does not see or generate actual weights. It only decides \textit{which} item to adjust and \textit{how} (strengthen or dampen). This separation of concerns achieves token efficiency while maintaining semantic expressiveness. Figure~\ref{fig:phase15_flow} illustrates this horizontal flow pattern.
+
+\textbf{Why binary operators suffice}: The choice of two operators ($\sigma$, $\delta$) is not a simplification but an \textit{alignment with LLM competence boundaries}. LLMs excel at qualitative reasoning---determining that "this document is more relevant given the new query"---but struggle with quantitative estimation---assigning precise weights like 0.73 vs. 0.68. By constraining the interface to directional decisions (strengthen/dampen), Phase 1.5 delegates quantitative mechanics (weight magnitude, normalization) to deterministic client-side logic where such precision is naturally achievable. This design respects what LLMs do well while avoiding what they do poorly.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{paper5_fig1_horizontal_v2.png}
+\caption{Phase 1.5 operator pattern: horizontal flow showing separation of decision (LLM) from execution (client). The LLM receives only item labels and selects an operator; the client applies the operator deterministically to update weights.}
+\label{fig:phase15_flow}
+\end{figure}
+
+This pattern has been validated across six domains (IME, RAG, Agent, Planning, Multi-agent, Multimodal), demonstrating:
+\begin{itemize}
+    \item 74--78\% token reduction vs. naive baselines
+    \item 100\% operator extraction success (1,512/1,512 turns, 324 runs)
+    \item Temperature-robust efficiency ($\Delta_{0.3-0.0}=0.0072$ tokens/turn on average)
+    \item Consistent efficiency across diverse reasoning tasks and model families
+\end{itemize}
+
+\subsection{Theoretical Foundation: Domain-Agnostic State Transitions}
+
+Phase 1.5's power lies in its \textit{semantic flexibility}. The same operators ($\sigma$, $\delta$) can represent:
+\begin{itemize}
+    \item IME: "This interpretation became more/less plausible"
+    \item RAG: "This document became more/less relevant"
+    \item Agent: "This task became higher/lower priority"
+\end{itemize}
+
+The operators provide a domain-agnostic vocabulary for expressing state transitions. What changes across domains is only the \textit{interpretation} of what $\sigma$ and $\delta$ mean, not the \textit{mechanism} of state management.
+
+\subsubsection{Conditions for Phase 1.5 Applicability}
+
+Phase 1.5 is not universally applicable to all reasoning tasks. Rather, it applies to tasks satisfying the following conditions:
+The pattern is also not anti-collapse: it defers premature fixation while preserving explicit commitment at output when task conditions require it.
+Series Consistency Statement: Unsupported interpretations are never injected at a fixed evidence state. Hypothesis-set expansion is evidence-gated, and unobserved possibilities remain unresolved. Evidence in this paper is restricted to explicit input, provided context, and declared retrieval outputs.
+
+\begin{enumerate}
+    \item \textbf{Finite candidate set}: A manageable number of competing options (interpretations, documents, actions, etc.) that can be tracked simultaneously
+    \item \textbf{Relative adjustment}: The task requires adjusting \textit{relative preferences} among candidates rather than computing absolute scores or rankings
+    \item \textbf{Incremental context}: Information accumulates gradually across turns, with each turn providing directional guidance rather than complete reassessment
+    \item \textbf{Qualitative sufficiency}: Direction of change (strengthen/dampen) can be determined through qualitative judgment without requiring precise quantitative estimation
+\end{enumerate}
+
+These conditions characterize a broad class of stateful reasoning tasks while excluding scenarios requiring, for example, continuous state spaces, absolute scoring without relative comparison, or quantitative precision in weight assignment.
+
+This suggests Phase 1.5 could serve as a generic interface for reasoning tasks meeting these criteria:
+\begin{enumerate}
+    \item Multiple competing options (interpretations, documents, actions, etc.)
+    \item Dynamic reweighting based on new information
+    \item State that persists across multiple LLM interactions
+\end{enumerate}
+
+\textbf{Scope note on ``transfer''}: In this paper, ``cross-domain transfer'' refers to applicability across semantically distinct stateful reasoning tasks that satisfy the above conditions, not unrestricted applicability across all possible reasoning problems.
+
+\subsection{Domain Diversity: Testing Phase 1.5 Generality}
+
+To test Phase 1.5's claim as a generic interface, we selected six domains that span critical dimensions of stateful reasoning:
+
+\textbf{Objective vs. Subjective Criteria:}
+\begin{itemize}
+    \item IME, RAG, Agent rely on relatively objective criteria (semantic plausibility, document relevance, task urgency)
+    \item Planning, Multi-agent, Multimodal require subjective judgment (resource constraints, expert credibility, aesthetic preferences)
+\end{itemize}
+
+\textbf{Static vs. Dynamic Context:}
+\begin{itemize}
+    \item IME, RAG involve relatively stable criteria within a conversation
+    \item Planning, Multi-agent, Multimodal face rapidly shifting constraints (client demands, competing perspectives, A/B test results)
+\end{itemize}
+
+Below we briefly describe the three domains requiring subjective judgment, as they test Phase 1.5 beyond its origins in semantic ambiguity management:
+
+\subsubsection{Planning: Project Task Management}
+
+Software projects involve tasks that compete for resources: user research, design prototyping, backend implementation, documentation. As requirements and constraints evolve, task priorities must shift:
+\begin{itemize}
+    \item Client demands immediate demo $\rightarrow$ prioritize design
+    \item Security vulnerability discovered $\rightarrow$ prioritize backend fixes
+    \item Developer sick leave $\rightarrow$ deprioritize implementation tasks
+\end{itemize}
+
+\textbf{State}: $\{(\text{task}_i, w_i)\}$ where weights represent resource allocation or temporal priority.
+
+\textbf{Operators}:
+\begin{itemize}
+    \item $\sigma(\text{task})$: "Increase focus on this task"
+    \item $\delta(\text{task})$: "Decrease focus on this task"
+\end{itemize}
+
+\textbf{Challenge}: Tasks have dependencies and temporal constraints that interpretations do not. Can Phase 1.5 handle these complexities?
+
+\subsubsection{Multi-Agent: Expert Perspective Integration}
+
+Decision-making often requires integrating advice from multiple domain experts who may disagree:
+\begin{itemize}
+    \item Security expert: "Encrypt everything"
+    \item UX expert: "Simplify the interface"
+    \item Business expert: "Ship faster"
+    \item Technical expert: "Refactor for maintainability"
+\end{itemize}
+
+As new information arrives (e.g., security breach, UX complaints), expert credibility shifts.
+
+\textbf{State}: $\{(\text{expert}_i, w_i)\}$ where weights represent current credibility or relevance.
+
+\textbf{Operators}:
+\begin{itemize}
+    \item $\sigma(\text{expert})$: "This expert's perspective is now more relevant"
+    \item $\delta(\text{expert})$: "This expert's perspective is now less relevant"
+\end{itemize}
+
+\textbf{Challenge}: Meta-reasoning about expertise differs fundamentally from judging item relevance. Can Phase 1.5 support this level of abstraction?
+
+\subsubsection{Multimodal: Design Candidate Selection}
+
+Design decisions involve navigating aesthetic spaces with multiple competing directions:
+\begin{itemize}
+    \item Modern vs. Classic
+    \item Minimal vs. Bold
+    \item Conservative vs. Experimental
+\end{itemize}
+
+Requirements like "we need to appeal to younger demographics" or "competitor launched similar minimal design" shift design space navigation.
+
+\textbf{State}: $\{(\text{design}_i, w_i)\}$ where weights represent viability or alignment with requirements.
+
+\textbf{Operators}:
+\begin{itemize}
+    \item $\sigma(\text{design})$: "This design direction is now more viable"
+    \item $\delta(\text{design})$: "This design direction is now less viable"
+\end{itemize}
+
+\textbf{Challenge}: Aesthetic judgments involve subjective preferences and brand identity---can Phase 1.5's objective weight manipulation support this?
+
+%==============================================================================
+% SECTION 3: METHOD
+%==============================================================================
+
+\section{Method}
+\label{sec:method}
+
+\subsection{Phase 1.5 Pattern (Recap)}
+
+The core Phase 1.5 pattern remains unchanged:
+
+\begin{enumerate}
+    \item \textbf{State initialization}: Create weighted items $\{(i_1, w_1), \ldots, (i_n, w_n)\}$ with $\sum w_i = 1$
+    \item \textbf{LLM prompt}: Send only item labels (not weights) plus current context
+    \item \textbf{LLM output}: Extract operator ($\sigma$ or $\delta$) and target item
+    \item \textbf{Client update}: Apply operator deterministically using fixed update rules
+\end{enumerate}
+
+\subsection{Operator Update Rules}
+
+We use consistent update rules across all domains:
+
+\textbf{Strengthen ($\sigma_{\text{item}}$)}:
+\begin{align}
+w_{\text{target}}' &= w_{\text{target}} + \alpha \cdot \sum_{i \neq \text{target}} w_i \\
+w_i' &= w_i \cdot (1 - \alpha) \quad \forall i \neq \text{target}
+\end{align}
+
+\textbf{Dampen ($\delta_{\text{item}}$)}:
+\begin{align}
+w_{\text{target}}' &= w_{\text{target}} \cdot (1 - \alpha) \\
+w_i' &= w_i + \frac{\alpha \cdot w_{\text{target}}}{n-1} \quad \forall i \neq \text{target}
+\end{align}
+
+where $\alpha = 0.8$\footnote{Chosen empirically for stability across all six domains. Larger values (e.g., 0.9) risk premature collapse; smaller values (e.g., 0.5) provide insufficient signal. Domain-specific tuning could optimize this parameter further. Note that this $\alpha$ parameterizes proportional redistribution across $n$ items and is not directly comparable to the additive step size $\alpha = 0.4$ in NRR-IME~\cite{saito2026ime}, which uses absolute increments sufficient for its two-interpretation scenarios.} (redistribution factor) and $n$ is the number of items. These are item-level operators; later result sections use the shorthand symbols $\sigma, \delta$.
+
+Weights are normalized after each operation to maintain $\sum w_i = 1$.
+Note that NRR-Core~\cite{saito2025nrr} specifies non-normalized weights;
+as discussed in NRR-IME~\cite{saito2026ime}, normalization is a practical
+simplification that preserves non-collapse through proportional redistribution.
+
+\subsection{Domain-Specific Implementations}
+
+\subsubsection{Planning Domain}
+
+\textbf{State items}:
+\begin{lstlisting}[language=Python]
+state = {
+    "user_research": 0.25,
+    "design_prototype": 0.25,
+    "implement_backend": 0.25,
+    "write_documentation": 0.25
+}
+\end{lstlisting}
+
+\textbf{Prompt template}:
+\begin{small}
+\begin{verbatim}
+You are managing project tasks that need attention.
+
+Current candidates (labels only):
+user_research, design_prototype, implement_backend, write_documentation
+
+New information: "{user_input}"
+
+Based on this information, which candidate should be adjusted and how?
+
+Respond with ONLY:
+operator: <sigma or delta>
+target: <one of the labels above>
+
+sigma = strengthen/prioritize this candidate
+delta = dampen/deprioritize this candidate
+\end{verbatim}
+\end{small}
+
+\textbf{Example scenarios}:
+\begin{itemize}
+    \item "Client demands immediate demo" $\rightarrow$ $\sigma(\text{design\_prototype})$
+    \item "Security vulnerability discovered" $\rightarrow$ $\sigma(\text{implement\_backend})$
+    \item "Developer on sick leave" $\rightarrow$ $\delta(\text{implement\_backend})$
+\end{itemize}
+
+\subsubsection{Multi-Agent Domain}
+
+\textbf{State items}:
+\begin{lstlisting}[language=Python]
+state = {
+    "expert_security": 0.25,
+    "expert_ux": 0.25,
+    "expert_business": 0.25,
+    "expert_technical": 0.25
+}
+\end{lstlisting}
+
+\textbf{Prompt template}: Same structure as Planning, but with "expert perspectives to consult" as context.
+
+\textbf{Example scenarios}:
+\begin{itemize}
+    \item "Data breach possibility reported" $\rightarrow$ $\sigma(\text{expert\_security})$
+    \item "User satisfaction declining" $\rightarrow$ $\sigma(\text{expert\_ux})$
+    \item "System performance issues" $\rightarrow$ $\sigma(\text{expert\_technical})$
+\end{itemize}
+
+\subsubsection{Multimodal Domain}
+
+\textbf{State items}:
+\begin{lstlisting}[language=Python]
+state = {
+    "design_modern": 0.25,
+    "design_classic": 0.25,
+    "design_minimal": 0.25,
+    "design_bold": 0.25
+}
+\end{lstlisting}
+
+\textbf{Prompt template}: Same structure as Planning, but with "design candidates under consideration" as context.
+
+\textbf{Example scenarios}:
+\begin{itemize}
+    \item "Need trustworthy feel for financial service" $\rightarrow$ $\sigma(\text{design\_classic})$
+    \item "Competitor launched minimal design" $\rightarrow$ $\delta(\text{design\_minimal})$, $\sigma(\text{design\_bold})$
+    \item "Target younger demographics" $\rightarrow$ $\sigma(\text{design\_modern})$
+\end{itemize}
+
+\subsection{Experimental Design}
+
+\subsubsection{Scenario Construction}
+
+We designed 18 scenarios across six domains, representing realistic state transitions in each:
+
+\textbf{IME (Interpretation Management)} (27 turns total):
+\begin{itemize}
+    \item Bank (5 turns): "bank" = financial institution vs. riverbank vs. verb forms
+    \item Spring (10 turns): Multiple meanings (season, water source, mechanical spring, etc.)
+    \item Court (12 turns): Legal court vs. sports court vs. royal court, etc.
+\end{itemize}
+
+\textbf{RAG (Retrieval-Augmented Generation)} (10 turns total):
+\begin{itemize}
+    \item Customer Support (5 turns): Ticket workflows, SLA policies, escalation procedures
+    \item Product Troubleshooting (5 turns): Common errors, configuration issues, debugging steps
+\end{itemize}
+
+\textbf{Agent (Task Prioritization)} (6 turns total):
+\begin{itemize}
+    \item Task Prioritization (6 turns): User research, design, implementation, documentation, testing
+\end{itemize}
+
+\textbf{Planning (Project Management)} (13 turns total):
+\begin{itemize}
+    \item Demo preparation (3 turns): Client demands, design completion, documentation needs
+    \item Security incident (3 turns): Vulnerability discovery, documentation updates, recovery
+    \item Resource constraint (4 turns): Developer unavailability, task reallocation
+    \item Priority shift (3 turns): Competitive pressure, user research insights
+\end{itemize}
+
+\textbf{Multi-agent (Expert Integration)} (14 turns total):
+\begin{itemize}
+    \item Security breach (4 turns): Threat assessment across expert domains
+    \item UX redesign (4 turns): User satisfaction issues, technical constraints
+    \item Market expansion (3 turns): New market requirements, compliance checks
+    \item Technical debt (3 turns): Performance issues, refactoring considerations
+\end{itemize}
+
+\textbf{Multimodal (Design Selection)} (14 turns total):
+\begin{itemize}
+    \item Brand identity (4 turns): Financial trust, youth appeal, simplicity, differentiation
+    \item Target audience (4 turns): Demographics shifts across age groups
+    \item Competitive analysis (3 turns): Competitor moves, differentiation needs
+    \item A/B test results (3 turns): User preferences, conservative backlash
+\end{itemize}
+
+\textbf{Per sweep}: 18 scenarios, 84 turns across 6 domains
+
+\subsubsection{Implementation}
+
+\textbf{Platform}: Google Colab with Python 3.10
+
+\textbf{LLMs}: Claude Sonnet 4 (\texttt{claude-sonnet-4-20250514}), GPT-4o-mini (\texttt{gpt-4o-mini-2024-07-18}), Gemini 2.0 Flash (\texttt{gemini-2.0-flash})
+
+\textbf{Parameters}:
+\begin{itemize}
+    \item Temperatures: 0.3 (main, IME-aligned) and 0.0 (robustness check)
+    \item Max tokens: 1000 (ample for operator extraction)
+    \item Trials per condition: 3
+\end{itemize}
+
+\textbf{Measurement}:
+\begin{itemize}
+    \item Input tokens, output tokens, total tokens per turn
+    \item Operator extraction success (binary: correct format and valid target)
+    \item State evolution tracking (weight history)
+\end{itemize}
+
+\subsubsection{Extraction Logic}
+
+We use simple pattern matching to extract operators:
+
+\begin{lstlisting}[language=Python]
+def extract_operator(response_text):
+    lines = response_text.strip().split('\n')
+    operator = None
+    target = None
+    
+    for line in lines:
+        line = line.strip().lower()
+        if line.startswith('operator:'):
+            op = line.split(':', 1)[1].strip()
+            if 'sigma' in op:
+                operator = 'sigma'
+            elif 'delta' in op:
+                operator = 'delta'
+        elif line.startswith('target:'):
+            target = line.split(':', 1)[1].strip()
+    
+    return operator, target
+\end{lstlisting}
+
+\textbf{Success criterion}: Both operator and target must be extracted and target must be a valid item label.
+
+%==============================================================================
+% SECTION 4: EXPERIMENTS
+%==============================================================================
+
+\section{Experiments}
+\label{sec:experiments}
+
+\subsection{Execution}
+
+Experiments were executed with no manual intervention under randomized task order. Each condition (scenario $\times$ model $\times$ temperature) was repeated for 3 trials, yielding 324 runs and 1,512 turns in total. The experimental code performed the following steps:
+
+\begin{enumerate}
+    \item Enumerate all tasks: 18 scenarios $\times$ 3 models $\times$ 2 temperatures $\times$ 3 trials
+    \item For each task, initialize state with uniform weights
+    \item For each turn in the scenario:
+    \begin{enumerate}
+        \item Construct prompt with current labels and user input
+        \item Call the selected model API with configured temperature
+        \item Extract operator and target from response
+        \item Validate extraction (both operator and target present, target valid)
+        \item Apply operator to update state
+        \item Record tokens, response text, and success status
+    \end{enumerate}
+    \item Save raw logs and aggregate statistics (mean/std, consistency)
+\end{enumerate}
+
+\subsection{Results Overview}
+
+\textbf{Summary statistics (all 6 domains, all conditions)}:
+\begin{itemize}
+    \item Total runs: 324 (18 scenarios $\times$ 3 models $\times$ 2 temperatures $\times$ 3 trials)
+    \item Total turns: 1,512
+    \item Operator extraction success rate: 100\% (1,512/1,512)
+    \item Average token difference between $T{=}0.3$ and $T{=}0.0$: 0.0072 tokens/turn
+    \item Maximum absolute temperature difference: 0.4444 tokens/turn
+    \item Trial-turn consistency (exact operator+target agreement across 3 trials): mean 0.9495 (87/108 conditions fully consistent)
+\end{itemize}
+
+\textbf{Per-domain breakdown (temperature 0.3, averaged across models)}:
+\begin{itemize}
+    \item IME: 76.5 tokens/turn
+    \item RAG: 69.6 tokens/turn
+    \item Agent: 64.1 tokens/turn
+    \item Planning: 63.6 tokens/turn
+    \item Multi-agent: 61.0 tokens/turn
+    \item Multimodal: 63.0 tokens/turn
+\end{itemize}
+
+All six domains demonstrate consistent token efficiency, with variation primarily reflecting state and prompt-context size rather than architectural instability.
+
+\subsection{Cross-Domain Analysis}
+
+Across all six domains, Phase 1.5 demonstrates consistent token efficiency:
+
+\textbf{Objective ranking domains} (IME, RAG, Agent):
+\begin{itemize}
+    \item IME: 76.5 tokens/turn average (temperature 0.3, averaged across models)
+    \item RAG: 69.6 tokens/turn average (temperature 0.3, averaged across models)
+    \item Agent: 64.1 tokens/turn average (temperature 0.3, averaged across models)
+\end{itemize}
+
+\textbf{Subjective judgment domains} (Planning, Multi-agent, Multimodal):
+\begin{itemize}
+    \item Planning: 63.6 tokens/turn average (temperature 0.3, averaged across models)
+    \item Multi-agent: 61.0 tokens/turn average (temperature 0.3, averaged across models)
+    \item Multimodal: 63.0 tokens/turn average (temperature 0.3, averaged across models)
+\end{itemize}
+
+\textbf{Overall (6 domains, 54 scenario-model conditions per temperature)}:
+\begin{itemize}
+    \item $T{=}0.0$: 65.720 tokens/turn (scenario-model mean), success 100\%
+    \item $T{=}0.3$: 65.728 tokens/turn (scenario-model mean), success 100\%
+    \item Mean temperature delta ($0.3-0.0$): 0.0072 tokens/turn
+\end{itemize}
+
+Interestingly, subjective judgment domains remain slightly lower in token usage than objective ranking domains in aggregate, largely because several subjective scenarios have smaller effective state descriptions than IME's multilingual ambiguity states.
+
+Despite these differences, token consumption remains within a controlled band (53.9--87.4 tokens/turn across scenario-model-temperature aggregates), demonstrating stable efficiency across fundamentally different reasoning tasks.
+
+%==============================================================================
+% SECTION 5: RESULTS
+%==============================================================================
+
+\section{Results}
+\label{sec:results}
+
+\subsection{Token Consumption Analysis}
+
+Figure~\ref{fig:token_comparison} shows token consumption across all 18 scenarios spanning six domains. The data reveals:
+
+\begin{enumerate}
+    \item \textbf{Consistent efficiency}: At $T{=}0.3$ (main setting), scenario-level token usage remains in a narrow range (59.1--78.5 tokens/turn, averaged across models)
+    \item \textbf{Domain independence}: Within-domain variance remains modest (e.g., Planning: 61.4--69.0 tokens/turn)
+    \item \textbf{Predictable scaling}: The full cross-condition analysis (324 runs) preserves this narrow-band behavior with minimal temperature effect
+\end{enumerate}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{paper5_fig2_all_domains.png}
+\caption{Token consumption per turn across all six domains. Under the IME-aligned main setting ($T{=}0.3$), the cross-scenario average is 65.7 tokens/turn (averaged across models), and the expanded protocol (3 models, 2 temperatures, 3 trials) preserves the same narrow-band efficiency profile.}
+\label{fig:token_comparison}
+\end{figure}
+
+Table~\ref{tab:token_consumption} provides detailed statistics for all scenarios.
+
+\begin{table}[t]
+\centering
+\caption{Token Consumption Across All Domains (Phase 1.5, $T{=}0.3$, averaged across models)}
+\label{tab:token_consumption}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Domain} & \textbf{Scenario} & \textbf{Turns} & \textbf{Avg/Turn} & \textbf{Success} \\
+\midrule
+IME & Bank & 5 & 74.0 & 100\% \\
+IME & Spring & 10 & 78.5 & 100\% \\
+IME & Court & 12 & 77.0 & 100\% \\
+RAG & Customer support & 5 & 70.1 & 100\% \\
+RAG & Troubleshooting & 5 & 69.1 & 100\% \\
+Agent & Task priority & 6 & 64.1 & 100\% \\
+Planning & Demo & 3 & 62.3 & 100\% \\
+Planning & Security & 3 & 61.7 & 100\% \\
+Planning & Resource & 4 & 61.4 & 100\% \\
+Planning & Priority & 3 & 69.0 & 100\% \\
+Multi-agent & Security review & 3 & 60.7 & 100\% \\
+Multi-agent & UX design & 4 & 60.6 & 100\% \\
+Multi-agent & Market analysis & 3 & 61.3 & 100\% \\
+Multi-agent & Tech debt & 4 & 61.2 & 100\% \\
+Multimodal & Brand refresh & 4 & 61.4 & 100\% \\
+Multimodal & Audience & 3 & 59.1 & 100\% \\
+Multimodal & Competitive & 4 & 62.4 & 100\% \\
+Multimodal & A/B test & 3 & 69.0 & 100\% \\
+\midrule
+\textbf{Average} & \textbf{All} & 84 & 65.7 & 100\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Operator Extraction Reliability}
+
+Across all 1,512 turns spanning 324 runs, Phase 1.5 achieved 100\% operator extraction success with zero failures.
+
+\textbf{Understanding the success rate}: This observed perfect reliability in our protocol should be understood as a property of the architectural design rather than an intrinsic guarantee of LLM behavior. The success stems from:
+\begin{enumerate}
+    \item \textbf{Constrained output format}: Two-line structure (\texttt{operator:}, \texttt{target:}) with minimal ambiguity
+    \item \textbf{Interface simplicity}: Binary operator selection with explicit target labels
+    \item \textbf{Task simplification}: LLM only performs qualitative judgment (which item? strengthen or dampen?) rather than complex reasoning
+\end{enumerate}
+
+Importantly, this 100\% success rate should not be interpreted as improved linguistic capability; it reflects reduced interface entropy, i.e., constraining the LLM's decision space to a minimal, well-structured operator-target format.
+
+Critically, this design is \textit{intentional}---Phase 1.5 succeeds by making the LLM's task trivially simple, not by relying on sophisticated LLM capabilities. This aligns with the pattern's philosophy: delegate complex mechanics (state management) to the client, expose only the simplest possible interface to the LLM.
+
+\textbf{Operator distribution across domains (all 324 runs)}:
+\begin{itemize}
+    \item Objective-leaning domains (IME, RAG, Agent): 686 $\sigma$ (88.6\%), 88 $\delta$ (11.4\%)
+    \item Subjective-heavy domains (Planning, Multi-agent, Multimodal): 189 $\sigma$ (25.6\%), 549 $\delta$ (74.4\%)
+    \item Overall: 875 $\sigma$ (57.9\%), 637 $\delta$ (42.1\%)
+\end{itemize}
+
+Figure~\ref{fig:operator_heatmap} visualizes this dramatic variation across all 18 scenarios, demonstrating operator usage ranging from 0\% to 100\% $\delta$ across individual scenarios.
+
+The striking difference between objective-leaning and subjective-heavy domains reveals a fundamental pattern: objective ranking tasks (semantic interpretation, document relevance) are largely $\sigma$-dominant, while subjective judgment domains (Planning, Multimodal, parts of Multi-agent) are often $\delta$-dominant. This suggests that domain semantics---not Phase 1.5's architecture---determines operator selection patterns.
+
+Table~\ref{tab:operator_stats} shows detailed operator usage statistics per domain.
+
+\begin{table}[t]
+\centering
+\caption{Operator Extraction Statistics Across All Domains (all 324 runs)}
+\label{tab:operator_stats}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Domain} & \textbf{Turns} & \textbf{$\sigma$ Usage} & \textbf{$\delta$ Usage} & \textbf{Success Rate} \\
+\midrule
+IME & 486 & 414 (85.2\%) & 72 (14.8\%) & 100\% \\
+RAG & 180 & 176 (97.8\%) & 4 (2.2\%) & 100\% \\
+Agent & 108 & 96 (88.9\%) & 12 (11.1\%) & 100\% \\
+\midrule
+Planning & 234 & 34 (14.5\%) & 200 (85.5\%) & 100\% \\
+Multi-agent & 252 & 104 (41.3\%) & 148 (58.7\%) & 100\% \\
+Multimodal & 252 & 51 (20.2\%) & 201 (79.8\%) & 100\% \\
+\midrule
+\textbf{Total} & 1512 & 875 (57.9\%) & 637 (42.1\%) & 100\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{paper5_fig4_operator_heatmap.png}
+\caption{Operator selection patterns across 18 scenarios. Individual scenarios exhibit dramatic variation from 0\% to 100\% $\delta$ usage, yet Phase 1.5 maintains 100\% extraction success across all patterns in this protocol. This wide variation combined with observed perfect reliability provides evidence for architectural generality under the tested conditions. Blue bars represent $\sigma$ (strengthen) operations, red bars represent $\delta$ (dampen) operations.}
+\label{fig:operator_heatmap}
+\end{figure}
+
+\textbf{Interpretation}: As shown in Figure~\ref{fig:operator_heatmap}, this wide variation in operator usage (0\%--100\% $\delta$ across individual scenarios) combined with consistent 100\% extraction success supports broad architectural transferability of the interface under tested conditions. The pattern does not constrain which operators domains select---it provides a stable interface. Across the full 324-run protocol, domain semantics determine behavior:
+
+\begin{itemize}
+    \item \textbf{Objective domains}: "Is this item relevant?" framing remains strongly $\sigma$-dominant (RAG 97.8\% $\sigma$, IME 85.2\% $\sigma$)
+    \item \textbf{Planning}: "Given constraints, which task is less urgent?" yields $\delta$-dominant behavior (85.5\% $\delta$)
+    \item \textbf{Multimodal}: subjective exclusion and ranking also favor $\delta$ (79.8\% $\delta$)
+    \item \textbf{Multi-agent}: mixed but $\delta$-leaning behavior (58.7\% $\delta$)
+\end{itemize}
+
+In this tested setup, Phase 1.5's two operators are sufficient for the evaluated domains: $\sigma$ alone would fail subjective judgment domains where deprioritization is primary, while additional operators were not required to cover observed behaviors. The 0\%--100\% variation across individual scenarios shows that Phase 1.5 succeeds \textit{because} it imposes minimal constraints on domain logic.
+Equivalently, Phase 1.5 is invariant to operator frequency distribution: reliability is maintained whether a domain is $\sigma$-dominant, $\delta$-dominant, or mixed.
+
+\subsection{Structural Similarity Across Domains}
+
+Figure~\ref{fig:structural_similarity} visualizes the structural parallel between all six domains. Despite semantic differences---interpretations vs. tasks vs. experts vs. designs---all domains share:
+
+\begin{enumerate}
+    \item \textbf{State representation}: Weighted items $\{(i, w)\}$
+    \item \textbf{LLM interface}: Labels only, no weight exposure
+    \item \textbf{Operator semantics}: $\sigma$ (strengthen) and $\delta$ (dampen)
+    \item \textbf{Client execution}: Deterministic weight updates
+\end{enumerate}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{paper5_fig3_structural_similarity.png}
+\caption{Structural similarity across six domains. All domains follow the same Phase 1.5 pattern: state as weighted items, LLM selects operator, client executes deterministically. The transfer pattern (center) shows the domain-agnostic abstraction.}
+\label{fig:structural_similarity}
+\end{figure}
+
+This structural uniformity is the foundation of Phase 1.5's generality---only the \textit{interpretation} of operators changes, not the \textit{mechanism}.
+
+\subsection{Comparative Analysis with Baseline}
+
+\textbf{Note on baseline measurements}: Our primary claim rests on \textit{cross-domain consistency} rather than baseline comparisons. Nevertheless, direct baseline measurements across multiple domains provide strong evidence for Phase 1.5's efficiency.
+
+We conducted Phase 1.0 baseline measurements on representative scenarios across four domains. In Phase 1.0, the complete state (all items with weights in JSON format) is sent to the LLM each turn, and the LLM regenerates the entire updated state.
+
+\textbf{Measured reductions}:
+\begin{itemize}
+    \item IME (Bank): 241.4 $\rightarrow$ 81.6 tokens/turn (66.2\% reduction)
+    \item RAG (Customer Support): 302.8 $\rightarrow$ 78.4 tokens/turn (74.1\% reduction)
+    \item Planning (Demo): 314.3 $\rightarrow$ 69.7 tokens/turn (77.8\% reduction)
+    \item Multimodal (Brand Refresh): 316.0 $\rightarrow$ 69.0 tokens/turn (78.2\% reduction)
+\end{itemize}
+
+The variation in reduction percentage (66--78\%) correlates with:
+\begin{enumerate}
+    \item State complexity: IME's 2-interpretation Bank state is simpler than 4-item states in other domains
+    \item Output verbosity: Phase 1.0's ``reasoning'' field length varies by domain
+    \item Prompt structure: Different domains require different context descriptions
+\end{enumerate}
+
+\textbf{Key observation}: The reduction magnitude (66--78\%) is remarkably consistent across all measured domains. In the expanded 324-run protocol, Phase 1.5 token usage remains in a narrow and temperature-robust band (mean $T{=}0.3$ vs.\ $T{=}0.0$ difference: 0.0072 tokens/turn; max absolute difference: 0.4444).
+
+%==============================================================================
+% SECTION 6: DISCUSSION
+%==============================================================================
+
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{From NRR-Derived Principle to Generic Interface}
+
+Phase 1.5 emerged from a concrete implementation challenge: how to efficiently manage semantic ambiguity in the Interpretation Management Engine (IME), a system implementing Non-Resolution Reasoning (NRR) principles. NRR's core insight---preserving multiple interpretations rather than forcing premature resolution---required tracking interpretation weights across conversational turns without prohibitive token costs.
+
+The operator pattern that solved this challenge proved to have unexpected generality. What began as an ambiguity-specific optimization revealed itself as a fundamental architectural principle applicable to any stateful reasoning task involving weighted items. This progression---from theory (NRR) to implementation (IME) to abstraction (Phase 1.5) to cross-domain validation---shows that NRR's contribution here is best understood as the \textit{source of the design principle}, while Phase 1.5 is the reusable interface validated across domains.
+In this framing, deployment is condition-responsive rather than recipe-fixed: commitment/defer behavior is selected by observed task state and updated when conditions shift.
+
+\subsection{Phase 1.5 as a Generic Interface}
+
+The results from six domains, including the expanded 324-run protocol, provide evidence that Phase 1.5 behaves as a \textit{generic state transition interface} under tested conditions. The pattern's success across semantically diverse domains---ambiguous language interpretation, document retrieval, agent task planning, project management, expert integration, and design space navigation---suggests it captures a reusable abstraction.
+
+\textbf{Key insight}: State management complexity can be separated from reasoning complexity. The LLM handles \textit{semantic reasoning} (which item should change and why), while the client handles \textit{state mechanics} (how weights update). This separation of concerns is analogous to virtual machines abstracting hardware details from application logic.
+
+\subsection{Architectural Principles}
+
+Based on our experiments, we propose the following principles for designing LLM systems with Phase 1.5:
+
+\subsubsection{Principle 1: Expose Labels, Hide Weights}
+
+In this implementation, the LLM does not see numeric weights. This reduces token consumption and prevents hallucination of plausible-looking but meaningless numbers. The LLM's role is \textit{qualitative judgment} (this item is now more important), not \textit{quantitative estimation} (this item should be weighted 0.73).
+
+\subsubsection{Principle 2: Operator Semantics Over Domain Logic}
+
+Define operators with clear, domain-agnostic semantics ($\sigma$ = strengthen, $\delta$ = dampen). Domain-specific logic resides in how these operators are \textit{interpreted}, not in the operators themselves. This allows the same infrastructure to serve multiple domains.
+
+\subsubsection{Principle 3: Deterministic Execution on Client}
+
+State updates must be deterministic and executed client-side. This ensures reproducibility, enables debugging, and allows state evolution to be audited independently of LLM behavior.
+
+\subsubsection{Principle 4: Stateless LLM, Stateful Client}
+
+The LLM remains stateless across turns (as per API design), while the client maintains persistent state. Phase 1.5 bridges these two worlds by treating each LLM call as a state transition decision, not a state regeneration task.
+
+\subsection{Domain Semantics and Operator Selection Patterns}
+
+A striking finding emerged from our cross-domain validation: operator selection patterns vary dramatically across domains, yet Phase 1.5 achieves 100\% success across all patterns. This reveals the true nature of Phase 1.5's generality.
+
+\subsubsection{The Objective-Subjective Divide}
+
+Our results demonstrate a clear distinction between objective ranking and subjective judgment domains:
+
+\textbf{Objective ranking domains} (IME, RAG, Agent):
+\begin{itemize}
+    \item Predominantly use $\sigma$ (strengthen): 88.6\% $\sigma$, 11.4\% $\delta$ (aggregated over all runs)
+    \item Task: Identify which item \textit{matches} current input
+    \item Logic: Binary classification (relevant vs. irrelevant)
+    \item Example: "Does this phrase indicate financial bank or river bank?"
+\end{itemize}
+
+\textbf{Subjective-heavy domains} (Planning, Multi-agent, Multimodal):
+\begin{itemize}
+    \item Frequent $\delta$ (dampen) usage: 74.4\% $\delta$ overall in these domains
+    \item Planning: 85.5\% $\delta$ (deprioritization-dominant)
+    \item Multi-agent: 58.7\% $\delta$ (mixed but dampen-leaning)
+    \item Multimodal: 79.8\% $\delta$ (exclusion-heavy judgments)
+    \item Task: Evaluate relative importance or appropriateness
+    \item Logic: Comparative judgment (more/less important given constraints)
+    \item Example: "Given budget cuts, which project tasks should be deprioritized?"
+\end{itemize}
+
+\subsubsection{Implications for Phase 1.5 Generality}
+
+This dramatic variation (0\%--100\% $\delta$ usage across individual scenarios) provides \textit{strong evidence} for broad Phase 1.5 generality under tested conditions:
+
+\begin{enumerate}
+    \item \textbf{Architecture is domain-agnostic}: Phase 1.5 succeeded across patterns ranging from $\sigma$-dominant (RAG/IME) to $\delta$-dominant (Planning/Multimodal). In this setup, the pattern does not pre-specify operator preference.
+    
+    \item \textbf{Domain semantics determine behavior}: The wide variation in operator usage demonstrates that \textit{domain logic}, not Phase 1.5's architecture, governs which operators are selected. Phase 1.5 merely provides the interface.
+    
+    \item \textbf{Both operators are essential}: Supporting both $\sigma$ and $\delta$ was crucial. Had Phase 1.5 only provided $\sigma$, it could not have served subjective judgment domains where explicit deprioritization is the primary operation.
+    
+    \item \textbf{Validates separation of concerns}: That operator selection patterns can vary so dramatically while maintaining 100\% success validates Phase 1.5's core principle---separating semantic reasoning (LLM's domain) from state mechanics (client's domain).
+\end{enumerate}
+
+\subsubsection{Practical Design Guidance}
+
+For practitioners implementing Phase 1.5:
+\begin{itemize}
+    \item \textbf{For objective ranking tasks}: Expect $\sigma$-dominant patterns. The LLM identifies matches and strengthens them.
+    \item \textbf{For subjective judgment tasks}: Expect balanced or even $\delta$-dominant patterns. The LLM makes comparative judgments and explicitly deprioritizes less relevant options.
+    \item \textbf{Design prompts accordingly}: Objective domains frame the task as "which item matches?" while subjective domains frame it as "which item is more/less important given constraints?"
+\end{itemize}
+
+\subsection{Comparison with Alternative Approaches}
+
+\subsubsection{vs. Embedding-Based Retrieval}
+
+Vector similarity-based approaches offer potential efficiency for narrow domains with clear keyword signals, but require:
+\begin{itemize}
+    \item Domain-specific embedding generation (costly via LLM APIs)
+    \item Predefined similarity metrics (fragile to distributional shift)
+    \item Limited semantic reasoning (cannot handle nuanced judgments)
+\end{itemize}
+
+Phase 1.5's operator abstraction is more general, requiring only that the LLM make binary decisions (strengthen vs. dampen) rather than computing continuous similarity scores. This makes Phase 1.5 applicable to both objective (IME, RAG) and subjective (Planning, Multimodal) domains.
+
+\subsubsection{vs. End-to-End LLM Generation}
+
+Naive approaches that send full state to the LLM each turn offer maximum flexibility but higher token cost. Our experiments show Phase 1.5 achieves 66--78\% token reduction while maintaining equivalent interface reliability (100\% extraction success rate in this protocol).
+
+The trade-off: Phase 1.5 requires upfront design of state representation and operators. This constraint, however, forces clarity about what state the system actually needs to track.
+
+\subsection{Limitations and Future Work}
+
+\subsubsection{Fixed State Space}
+
+Current experiments use fixed item sets (typically 4 items, with IME scenarios ranging from 2--4). Real-world applications may require dynamic state spaces where items are added or removed. Extensions to Phase 1.5 could include:
+\begin{itemize}
+    \item \texttt{add(item)}: Insert new item with minimal initial weight
+    \item \texttt{remove(item)}: Delete item and redistribute its weight
+\end{itemize}
+
+\subsubsection{Higher-Order Operators}
+
+Some scenarios might benefit from compound operations:
+\begin{itemize}
+    \item \texttt{swap(A, B)}: Exchange weights between two items
+    \item \texttt{reset()}: Return to uniform distribution
+    \item \texttt{focus(subset)}: Redistribute weight among a subset of items
+\end{itemize}
+
+These could be implemented as macros composed of $\sigma$ and $\delta$ primitives.
+
+\subsubsection{Multi-Dimensional State}
+
+Our experiments used 1D weight vectors. Some domains might require multi-dimensional state:
+\begin{itemize}
+    \item RAG with both relevance and recency: $\{(doc, w_{\text{rel}}, w_{\text{rec}})\}$
+    \item Planning with priority and feasibility: $\{(task, w_{\text{pri}}, w_{\text{fea}})\}$
+\end{itemize}
+
+Phase 1.5 could extend to multi-dimensional operators like $\sigma_{\text{relevance}}$ and $\delta_{\text{recency}}$.
+
+\subsubsection{Learned Update Rules}
+
+We used fixed update rules (single $\alpha$ across conditions). Adaptive systems could learn domain-specific update magnitudes:
+\begin{itemize}
+    \item Reinforcement learning on task success rates
+    \item User feedback on ranking quality
+    \item A/B testing different $\alpha$ values
+\end{itemize}
+
+\subsection{Broader Implications}
+
+Phase 1.5's success across six domains suggests a broader principle: \textit{LLM architectures should be non-monolithic}. Rather than expecting LLMs to handle all aspects of a task (reasoning + state management + execution), we should decompose systems into specialized components:
+
+\begin{itemize}
+    \item \textbf{LLM}: Semantic reasoning and decision-making
+    \item \textbf{Client}: State persistence and deterministic updates
+    \item \textbf{External systems}: Data retrieval, action execution, validation
+\end{itemize}
+
+This architectural philosophy aligns with emerging patterns in LLM application development:
+\begin{itemize}
+    \item Tool use (LLMs call external functions rather than generate outputs directly)
+    \item Retrieval-augmented generation (LLMs reason over retrieved context, not memorized facts)
+    \item Agent frameworks (LLMs plan actions, external systems execute them)
+\end{itemize}
+
+\textbf{The operator selection pattern finding reinforces this principle}: Our discovery that operator usage varies from 0\% to 100\% $\delta$ across individual scenarios, yet Phase 1.5 maintains perfect reliability in this protocol, indicates that \textit{architectural generality emerges from proper separation of concerns}. The LLM's semantic reasoning adapts to each domain's requirements (objective matching vs. subjective judgment), while Phase 1.5's state mechanics remain unchanged. This separation---not architectural flexibility in the traditional sense---supports broad transfer under tested conditions.
+
+Had we attempted to design a "smart" state management system that predicted which domains would use which operators, we would have created brittle domain-specific logic. Instead, Phase 1.5 provides a stable interface and lets domain semantics determine behavior. This design philosophy---\textit{stable infrastructure with semantic flexibility}---may apply beyond state management to other LLM system components.
+
+\subsubsection{Connection to Non-Resolution Reasoning}
+
+Phase 1.5's origins in Non-Resolution Reasoning (NRR) reveal a deeper architectural connection. NRR's principle---\textit{preserve ambiguity rather than force premature resolution}---motivated a concrete systems principle in IME: preserve semantic flexibility while externalizing state mechanics.
+
+Both approaches recognize that complexity should be managed through appropriate abstractions rather than collapsed into single representations. NRR preserves multiple interpretations with weights; Phase 1.5 operationalizes that idea as a reusable interface for cross-domain state transitions. This "non-monolithic" philosophy may extend beyond LLM systems to AI architecture more broadly.
+
+The progression from NRR (theoretical framework) to IME (domain-specific implementation) to Phase 1.5 (generic pattern) demonstrates how principled abstractions can generalize across domains. In this framing, cross-domain transferability is the central empirical claim, and NRR provides the originating design rationale.
+
+Phase 1.5 contributes a concrete pattern for one critical component: \textit{stateful reasoning on stateless APIs}.
+
+\paragraph{Reproducibility note.}
+We release code, fixed protocol settings, and primary logs for the cross-domain validation package.
+The reproducibility specification fixes model set, temperature conditions, and trial counts used in the 324-run protocol.
+Core scripts map directly to versioned artifacts, including figure files generated from the same experiment dataset.
+Environment details and the full artifact map are documented in \texttt{nrr-transfer/reproducibility.md}.
+
+%==============================================================================
+% SECTION 7: CONCLUSION
+%==============================================================================
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+This work demonstrates Phase 1.5's cross-domain transferability across six semantically distinct domains. Originally discovered during the implementation of the Interpretation Management Engine (IME)---a system informed by Non-Resolution Reasoning (NRR)---Phase 1.5 is shown to be applicable beyond ambiguity management in the tested domains.
+
+We demonstrated Phase 1.5 across six semantically distinct domains with an IME-aligned multi-condition protocol (3 models $\times$ 2 temperatures $\times$ 3 trials): 324 runs and 1,512 total turns. The pattern achieved observed perfect reliability in this protocol (100\% operator extraction success) and consistent efficiency under temperature variation (mean $T{=}0.3$ vs.\ $T{=}0.0$ difference: 0.0072 tokens/turn; max absolute difference: 0.4444).
+
+Critically, Phase 1.5 required no domain-specific modifications. The same two operators---$\sigma$ (strengthen) and $\delta$ (dampen)---served all six domains through semantic reinterpretation alone. This transferability suggests Phase 1.5 captures a fundamental pattern: \textit{separating decision-making (what to change) from execution (how to change it)} enables both efficiency and clarity in LLM system design.
+
+A striking empirical finding strengthens this claim: operator selection patterns varied dramatically across domains and conditions---including scenarios ranging from $\sigma$-dominant to $\delta$-dominant behavior---yet Phase 1.5 maintained 100\% extraction success across all patterns in this protocol. This indicates that Phase 1.5's architecture does not require domain-specific operator patterns; rather, \textit{domain logic determines operator selection while Phase 1.5 provides the stable interface}. The wide variation in behavior combined with observed reliability across tested patterns supports broad transferability rather than narrow domain fitting.
+
+The progression from NRR theory to IME implementation to Phase 1.5 abstraction demonstrates how domain-specific challenges can yield broadly applicable solutions. What began as an optimization for ambiguity management emerged as a domain-agnostic interface for stateful reasoning tasks involving weighted items.
+
+Future work will explore dynamic state spaces, learned update rules, and compositional architectures where multiple Phase 1.5 modules coordinate. We envision Phase 1.5 as foundational infrastructure for principled LLM system design, where efficiency and maintainability emerge from separation of concerns rather than monolithic prompting strategies.
+
+Phase 1.5 represents not just a technique but a design philosophy: \textit{let LLMs reason semantically, let clients manage state mechanically}. This separation, simple yet powerful, may prove essential as LLM-based systems grow in complexity and scale.
+Accordingly, commitment remains revisable: when later interaction contradicts an earlier fixation, systems should reopen and re-evaluate rather than preserve stale commitments.
+
+%==============================================================================
+% ACKNOWLEDGMENTS
+%==============================================================================
+
+\section*{Acknowledgments}
+
+The author gratefully acknowledges the support of large language 
+models---including Claude (Anthropic), ChatGPT and Codex (OpenAI)---for their assistance in linguistic refinement, 
+LaTeX formatting, and general proofreading support during the 
+preparation of this manuscript.
+All concepts, arguments, and conclusions remain solely the 
+responsibility of the author.
+
+%==============================================================================
+% REFERENCES
+%==============================================================================
+
+\begin{thebibliography}{99}
+
+\bibitem{saito2025nrr}
+Saito, K. (2025).
+\textit{NRR-Core: Non-Resolution Reasoning as a Computational Framework for Contextual Identity and Ambiguity Preservation}.
+arXiv:2512.13478.
+
+\bibitem{saito2026phi}
+Saito, K. (2026).
+\textit{NRR-Phi: Text-to-State Mapping for Ambiguity Preservation in LLM Inference}.
+arXiv:2601.19933.
+
+\bibitem{saito2026ime}
+Saito, K. (2026).
+\textit{NRR-IME: Structure-Aware Optimization for Stateful Reasoning on Stateless LLM APIs}.
+Under moderation manuscript (series reference status as of February 26, 2026).
+
+\end{thebibliography}
+
+\end{document}
