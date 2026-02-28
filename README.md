@@ -26,7 +26,8 @@ NRR optimizes when to commit and when to defer, under explicit conditions.
 
 - This repository includes manuscript and reproducibility assets.
 - Current manuscript snapshot is stored under `manuscript/current/`.
-- Full run outputs and generated final figure PNGs are intentionally not included before arXiv posting.
+- Primary experiment logs for the 324-run protocol are included at `data/results/transfer_3trial_results.json`.
+- Generated final figure PNGs from private reruns are not committed by default.
 
 ## Current protocol shape
 
@@ -44,8 +45,8 @@ nrr-transfer/
 |-- reproducibility.md
 |-- manuscript/
 |   `-- current/
-|       |-- paper5-nrr-transfer-v28.tex
-|       |-- paper5-nrr-transfer-v28.pdf
+|       |-- paper5-nrr-transfer-v29.tex
+|       |-- paper5-nrr-transfer-v29.pdf
 |       |-- paper5_fig1_horizontal_v2.png
 |       |-- paper5_fig2_all_domains.png
 |       |-- paper5_fig3_structural_similarity.png
@@ -67,7 +68,7 @@ nrr-transfer/
 ## Legacy handling
 
 Pre-v28 transfer scripts are preserved in `archive/legacy_pre_v28_2026-02-26/`.
-Legacy full-result datasets are not included in this pre-submission snapshot.
+Legacy full-result datasets are not bundled in `archive/`; the canonical run log is `data/results/transfer_3trial_results.json`.
 
 ## Reproducibility
 

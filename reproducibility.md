@@ -1,9 +1,9 @@
-# Reproducibility (NRR-Transfer pre-submission snapshot)
+# Reproducibility (NRR-Transfer)
 
 ## Scope
 
-This repository snapshot provides manuscript and reproducibility assets (code/schema/scripts).
-Full run outputs are intentionally excluded in this pre-arXiv state.
+This repository provides manuscript and reproducibility assets (code/schema/scripts).
+The primary 324-run log is included at `data/results/transfer_3trial_results.json`.
 
 Legacy pre-v28 materials:
 - `archive/legacy_pre_v28_2026-02-26/`
@@ -49,7 +49,7 @@ python3 experiments/run_transfer_3trial.py \
   --alpha 0.4
 ```
 
-### B) Regenerate figures from private results
+### B) Regenerate figures from included results
 
 ```bash
 python3 figures/generate_figures_from_results.py
@@ -59,7 +59,7 @@ Outputs:
 - `figures/paper5_fig2_all_domains.png`
 - `figures/paper5_fig4_operator_heatmap.png`
 
-Note: keep generated PNGs outside committed files before arXiv posting.
+Note: generated PNGs can vary slightly across environments while preserving the same aggregate trends.
 
 ## Artifact map
 
@@ -67,6 +67,10 @@ Note: keep generated PNGs outside committed files before arXiv posting.
   - `data/transfer_scenarios.json`
 - Figure generation script:
   - `figures/generate_figures_from_results.py`
+- Primary run log:
+  - `data/results/transfer_3trial_results.json`
+- Result checksum:
+  - `data/results/checksums_sha256.txt`
 - Output policy notes:
   - `data/results/README.md`
   - `figures/README.md`
@@ -75,4 +79,4 @@ Note: keep generated PNGs outside committed files before arXiv posting.
 
 - PNG files may differ bit-for-bit across environments while remaining visually equivalent.
 - API-based reruns can produce small token-count variation due to provider-side changes over time.
-- Full results are intentionally withheld until arXiv posting.
+- API-based reruns can produce small token-count variation due to provider-side changes over time.
