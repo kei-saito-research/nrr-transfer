@@ -12,7 +12,11 @@ NRR-Transfer is a cross-domain package for testing **ambiguity-preserving infere
 - `ambiguity-preserving inference` = `曖昧性保持推論`
 
 Part of the Non-Resolution Reasoning (NRR) research program.
-Program Map (series hub): https://github.com/kei-saito-research/nrr-core/blob/main/PROGRAM_MAP.md
+
+## NRR Series Hub (Start here)
+
+For the cross-paper map and current series links, start here:
+- [NRR Program Map](https://github.com/kei-saito-research/nrr-core/blob/main/PROGRAM_MAP.md)
 
 NRR is not an anti-LLM framework.
 NRR does not replace standard LLM use.
@@ -20,7 +24,8 @@ NRR optimizes when to commit and when to defer, under explicit conditions.
 
 ## DOI
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18793345.svg)](https://doi.org/10.5281/zenodo.18793345)
+- Concept DOI (always points to the latest version): [10.5281/zenodo.18793344](https://doi.org/10.5281/zenodo.18793344)
+- Latest version DOI (as of 2026-02-28): [10.5281/zenodo.18796093](https://doi.org/10.5281/zenodo.18796093)
 
 ## Publication handling
 
