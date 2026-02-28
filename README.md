@@ -45,8 +45,8 @@ nrr-transfer/
 |-- reproducibility.md
 |-- manuscript/
 |   `-- current/
-|       |-- paper5-nrr-transfer-v29.tex
-|       |-- paper5-nrr-transfer-v29.pdf
+|       |-- paper5-nrr-transfer-v30.tex
+|       |-- paper5-nrr-transfer-v30.pdf
 |       |-- paper5_fig1_horizontal_v2.png
 |       |-- paper5_fig2_all_domains.png
 |       |-- paper5_fig3_structural_similarity.png

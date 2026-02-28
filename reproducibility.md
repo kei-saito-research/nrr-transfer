@@ -79,4 +79,3 @@ Note: generated PNGs can vary slightly across environments while preserving the 
 
 - PNG files may differ bit-for-bit across environments while remaining visually equivalent.
 - API-based reruns can produce small token-count variation due to provider-side changes over time.
-- API-based reruns can produce small token-count variation due to provider-side changes over time.
